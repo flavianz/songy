@@ -7,7 +7,6 @@ export default function Signup() {
     if (getUser()) {
         return <Navigate to={"/profile"} />;
     }
-
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [confirmPassword, setConfirmPassword] = useState("");
@@ -19,11 +18,13 @@ export default function Signup() {
         setLoading(true);
         setError("");
         e.preventDefault();
+
         if (confirmPassword.toString() != password.toString()) {
             setError("Passwords don't match");
             setLoading(false);
             return;
         }
+
         try {
             await firebaseCreateUserWithEmailAndPassword(email, password);
         } catch (error) {

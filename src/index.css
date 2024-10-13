@@ -30,3 +30,7 @@ a {
   color: var(--text);
   text-decoration: none;
 }
+
+p {
+  color: var(--text);
+}

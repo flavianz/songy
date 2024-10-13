@@ -1,6 +1,7 @@
 import { getUser } from "../../context/AuthContext.tsx";
 import { Navigate } from "react-router-dom";
 import { signOut } from "../../firebase/auth.ts";
+import EnsureSignOut from "../../provider/EnsureSignOut.tsx";
 
 export default function Profile() {
     let user = getUser();
@@ -10,11 +11,11 @@ export default function Profile() {
     }
 
     return (
-        <div>
-            <p>Loggen in as {user.email}</p>
+        <EnsureSignOut>
+            <p>Logged in as {user.email}</p>
             <button type={"button"} onClick={() => signOut()}>
                 Sign Out
             </button>
-        </div>
+        </EnsureSignOut>
     );
 }

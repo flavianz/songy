@@ -5,16 +5,22 @@ import {
     GoogleAuthProvider,
     signInWithEmailAndPassword,
     signInWithPopup,
+    sendEmailVerification,
 } from "firebase/auth";
+import { BASE_URL } from "../main.tsx";
 
 export async function firebaseCreateUserWithEmailAndPassword(
     email: string,
     password: string,
 ) {
-    return await createUserWithEmailAndPassword(auth, email, password);
+    let result = await createUserWithEmailAndPassword(auth, email, password);
+    await sendEmailVerification(result.user, {
+        url: BASE_URL + "email_verified",
+    });
+    return result;
 }
 
-export async function firebaseLoginWithEmailAndPassword(
+export async function firebaseSignInWithEmailAndPassword(
     email: string,
     password: string,
 ) {

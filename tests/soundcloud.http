@@ -1,0 +1,5 @@
+### GET request to example server
+GET https://api.soundcloud.com/tracks/TRACK_ID \
+accept: application/json; charset=utf-8" \
+Authorization: OAuth ACCESS_TOKEN"
+###

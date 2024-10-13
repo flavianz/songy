@@ -1,12 +1,12 @@
 import { FormEvent, useState } from "react";
 import {
-    firebaseLoginWithEmailAndPassword,
+    firebaseSignInWithEmailAndPassword,
     signInWithGoogle,
 } from "../../firebase/auth.ts";
 import { getUser } from "../../context/AuthContext.tsx";
 import { Navigate } from "react-router-dom";
 
-export default function Login() {
+export default function SignIn() {
     if (getUser()) {
         return <Navigate to="/profile" />;
     }
@@ -15,8 +15,8 @@ export default function Login() {
 
     function handleSubmit(e: FormEvent<HTMLFormElement>) {
         e.preventDefault();
-        firebaseLoginWithEmailAndPassword(email, password).then((e) =>
-            alert(e),
+        firebaseSignInWithEmailAndPassword(email, password).then((e) =>
+            console.log(e),
         );
     }
 
@@ -37,7 +37,11 @@ export default function Login() {
                 />
                 <button type="submit">Login</button>
             </form>
-            <button onClick={() => signInWithGoogle()}>Google</button>
+            <button
+                onClick={() => signInWithGoogle().then((e) => console.log(e))}
+            >
+                Google
+            </button>
         </div>
     );
 }
