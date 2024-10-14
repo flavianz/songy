@@ -1,12 +1,12 @@
-import { signOut } from "../../firebase/auth.ts";
-import EnsureSignOut from "../../provider/EnsureSignOut.tsx";
+import { ensureSignOut, signOut } from "../../firebase/auth.ts";
 import { sendEmailVerification } from "firebase/auth";
 import { getUser } from "../../context/AuthContext.tsx";
 import { BASE_URL } from "../../main.tsx";
 
 export default function CheckInbox() {
+    ensureSignOut(true);
     return (
-        <EnsureSignOut allowEmailUnverified>
+        <div>
             <p>
                 Check Inbox! <br />
                 or
@@ -21,6 +21,6 @@ export default function CheckInbox() {
             >
                 Resend Email
             </button>
-        </EnsureSignOut>
+        </div>
     );
 }

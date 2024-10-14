@@ -8,6 +8,8 @@ import {
     sendEmailVerification,
 } from "firebase/auth";
 import { BASE_URL } from "../main.tsx";
+import { getUser } from "../context/AuthContext.tsx";
+import { useNavigate } from "react-router-dom";
 
 export async function firebaseCreateUserWithEmailAndPassword(
     email: string,
@@ -36,4 +38,19 @@ export async function signInWithGoogle() {
 
 export function signOut() {
     return auth.signOut();
+}
+
+export function ensureSignOut(allowEmailUnverified: boolean = false) {
+    let user = getUser();
+    let navigate = useNavigate();
+
+    if (!user) {
+        navigate("/login");
+        return;
+    }
+
+    if (!user.emailVerified && !allowEmailUnverified) {
+        navigate("/check_inbox");
+        return;
+    }
 }

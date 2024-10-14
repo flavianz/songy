@@ -1,21 +1,38 @@
 import { getUser } from "../../context/AuthContext.tsx";
-import { Navigate } from "react-router-dom";
-import { signOut } from "../../firebase/auth.ts";
-import EnsureSignOut from "../../provider/EnsureSignOut.tsx";
+import { ensureSignOut, signOut } from "../../firebase/auth.ts";
+import { fetchUser } from "../../firebase/functions/user.ts";
+import { useEffect, useState } from "react";
+import { FirestoreUser } from "../../firebase/types.ts";
 
 export default function Profile() {
-    let user = getUser();
+    ensureSignOut();
+    let user = getUser()!;
 
-    if (!user) {
-        return <Navigate to={"/login"} />;
+    const [loading, setLoading] = useState(false);
+    const [userData, setUserData] = useState<FirestoreUser | null>(null);
+
+    useEffect(() => {
+        fetchUser(user.uid).then((data) => {
+            setUserData(data);
+            setLoading(false);
+        });
+    }, []);
+
+    if (loading) {
+        return (
+            <div>
+                <p>loading...</p>
+            </div>
+        );
     }
 
     return (
-        <EnsureSignOut>
+        <div>
             <p>Logged in as {user.email}</p>
             <button type={"button"} onClick={() => signOut()}>
                 Sign Out
             </button>
-        </EnsureSignOut>
+            <p>Username: {userData?.username}</p>
+        </div>
     );
 }
