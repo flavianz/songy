@@ -45,7 +45,7 @@ export function ensureSignOut(allowEmailUnverified: boolean = false) {
     let navigate = useNavigate();
 
     if (!user) {
-        navigate("/login");
+        navigate("/signin");
         return;
     }
 

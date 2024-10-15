@@ -28,7 +28,7 @@ export default function Profile() {
 
     return (
         <div>
-            <p>Logged in as {user.email}</p>
+            <p>Logged in as {user?.email}</p>
             <button type={"button"} onClick={() => signOut()}>
                 Sign Out
             </button>

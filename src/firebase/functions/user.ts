@@ -1,9 +1,9 @@
-import { collection, addDoc, getDoc, doc } from "firebase/firestore";
+import { collection, setDoc, getDoc, doc } from "firebase/firestore";
 import { firestore } from "../firebase.ts";
 import { FirestoreUser } from "../types.ts";
 
 export async function createFirebaseUser(uid: string, username: string) {
-    return await addDoc(collection(firestore, "users"), {
+    return await setDoc(doc(collection(firestore, "users"), uid), {
         uid: uid,
         username: username,
         level: 0,

@@ -9,6 +9,7 @@ import Profile from "./screens/Profile/Profile.tsx";
 import Signup from "./screens/Signup/Signup.tsx";
 import EmailVerified from "./screens/EmailVerified/EmailVerified.tsx";
 import CheckInbox from "./screens/CheckInbox/CheckInbox.tsx";
+import Join from "./screens/Lobby/Join/Join.tsx";
 
 export const BASE_URL = "http://localhost:5137";
 
@@ -18,7 +19,7 @@ const browserRouter = createBrowserRouter([
         element: <Home />,
     },
     {
-        path: "/login",
+        path: "/signin",
         element: <SignIn />,
     },
     {
@@ -36,6 +37,10 @@ const browserRouter = createBrowserRouter([
     {
         path: "/check_inbox",
         element: <CheckInbox />,
+    },
+    {
+        path: "/lobby/join",
+        element: <Join />,
     },
 ]);
 

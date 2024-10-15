@@ -4,9 +4,10 @@ import {
     signInWithGoogle,
 } from "../../firebase/auth.ts";
 import { getUser } from "../../context/AuthContext.tsx";
-import { Navigate } from "react-router-dom";
+import { Navigate, useNavigate } from "react-router-dom";
 
 export default function SignIn() {
+    const navigate = useNavigate();
     if (getUser()) {
         return <Navigate to="/profile" />;
     }
@@ -38,7 +39,12 @@ export default function SignIn() {
                 <button type="submit">Login</button>
             </form>
             <button
-                onClick={() => signInWithGoogle().then((e) => console.log(e))}
+                onClick={() =>
+                    signInWithGoogle().then((e) => {
+                        console.log(e);
+                        navigate("/email_verified");
+                    })
+                }
             >
                 Google
             </button>
