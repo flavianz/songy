@@ -1,25 +1,28 @@
 rules_version = '2';
 
 service cloud.firestore {
-  match /databases/{database}/documents {
-  	function isSignedIn() {
-    	return request.auth != null && request.auth.token.email_verified;
+    match /databases/{database}/documents {
+        function isSignedIn() {
+            return request.auth != null && request.auth.token.email_verified;
+        }
+        match /users/{userDoc} {
+            allow write: if isSignedIn() && request.auth.uid == request.resource.data.uid &&
+                    request.resource.data.keys().hasOnly(["uid", "username", "level"]);
+            allow read: if isSignedIn() && request.auth.uid == resource.data.uid;
+        }
+
+        match /lobbies/{lobbyDoc} {
+            function isHost() {
+                return resource.data.host == request.auth.uid;
+            }
+
+            allow read: if isSignedIn();
+            allow create: if isSignedIn();
+            allow update: if isSignedIn() && (isHost()
+                    || (request.resource.data.host == resource.data.host
+                    && request.resource.data.max_players == resource.data.max_players
+                    && request.resource.data.state == resource.data.state && resource.data.state == "idle" ))
+                    && request.resource.data.players.length <= 10;
+        }
     }
-		match /users/{userDoc} {
-    	allow write: if isSignedIn() && request.auth.uid == request.resource.data.uid && 
-      		request.resource.data.keys().hasOnly(["uid", "username", "level"]);
-      allow read: if isSignedIn() && request.auth.uid == resource.data.uid;
-    }
-    
-    match /lobbies/{lobbyDoc} {
-    	allow read: if isSignedIn();
-      allow create: if isSignedIn();
-      
-      match /players/{playerDoc} {
-      	allow create: if isSignedIn();
-        allow update: if isSignedIn();
-        allow read: if isSignedIn();
-      }
-    }
-  }
 }

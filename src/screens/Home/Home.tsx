@@ -7,11 +7,11 @@ export default function Home() {
         <div id={styles.container}>
             <h1>Songy</h1>
             <div id={styles.playContainer}>
-                <a href="/lobby/create" className={styles.playButton}>
+                <a href="/create" className={styles.playButton}>
                     <h3>Create Lobby</h3>
                     <p>Create a lobby for you and your friends</p>
                 </a>
-                <a href="/lobby/join" className={styles.playButton}>
+                <a href="/join" className={styles.playButton}>
                     <h3>Join</h3>
                     <p>Join an existing lobby by code</p>
                 </a>
