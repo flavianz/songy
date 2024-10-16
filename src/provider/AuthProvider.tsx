@@ -1,7 +1,8 @@
 import { ReactElement, ReactNode, useEffect, useState } from "react";
 import { AuthContext } from "../context/AuthContext";
 import { auth } from "../firebase/firebase.ts";
-import { User } from "firebase/auth";
+import { FirestoreUser } from "../firebase/types.ts";
+import { fetchUser } from "../firebase/functions/user.ts";
 
 export function AuthProvider({
     children,
@@ -10,12 +11,19 @@ export function AuthProvider({
     children: any;
     loadingComponent: ReactElement;
 }): ReactNode {
-    const [user, setUser] = useState<User | null>(null);
+    const [user, setUser] = useState<FirestoreUser | null>(null);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
         return auth.onAuthStateChanged((firebaseUser) => {
-            setUser(firebaseUser);
+            if (firebaseUser) {
+                fetchUser(firebaseUser.uid).then((data) => {
+                    setUser({ ...data, auth: firebaseUser });
+                    setLoading(false);
+                });
+            } else {
+                setUser(null);
+            }
             setLoading(false);
         });
     }, []);

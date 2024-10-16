@@ -14,7 +14,7 @@ export default function CheckInbox() {
             <button onClick={() => signOut()}>Sign out</button>
             <button
                 onClick={() =>
-                    sendEmailVerification(getUser()!, {
+                    sendEmailVerification(getUser()!.auth, {
                         url: BASE_URL + "email_verified",
                     })
                 }

@@ -49,7 +49,7 @@ export function ensureSignOut(allowEmailUnverified: boolean = false) {
         return;
     }
 
-    if (!user.emailVerified && !allowEmailUnverified) {
+    if (!user.auth.emailVerified && !allowEmailUnverified) {
         navigate("/check_inbox");
         return;
     }

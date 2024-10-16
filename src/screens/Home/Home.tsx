@@ -16,7 +16,11 @@ export default function Home() {
                     <p>Join an existing lobby by code</p>
                 </a>
             </div>
-            {user ? <p>Logged in as {user.email}</p> : <p>Not logged in</p>}
+            {user ? (
+                <p>Logged in as {user.auth.email}</p>
+            ) : (
+                <p>Not logged in</p>
+            )}
         </div>
     );
 }

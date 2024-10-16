@@ -1,18 +1,11 @@
 import { FormEvent, useState } from "react";
-import {
-    collection,
-    getDocs,
-    query,
-    where,
-    addDoc,
-    doc,
-} from "firebase/firestore";
+import { doc, getDoc, setDoc } from "firebase/firestore";
 import { firestore } from "../../../firebase/firebase.ts";
 import { getUser } from "../../../context/AuthContext.tsx";
 import { ensureSignOut } from "../../../firebase/auth.ts";
 
 export default function Join() {
-    ensureSignOut(true);
+    ensureSignOut();
     let user = getUser()!;
 
     const [code, setCode] = useState("");
@@ -20,18 +13,15 @@ export default function Join() {
 
     async function handleSubmit(e: FormEvent<HTMLFormElement>) {
         e.preventDefault();
-        let lobby = await getDocs(
-            query(collection(firestore, "lobbies"), where("code", "==", code)),
-        );
-        if (lobby.docs.length === 0) {
+        let lobby = await getDoc(doc(firestore, "users", code));
+        if (lobby.exists()) {
             setError("Unknown lobby code");
             return;
         }
-        await addDoc(
-            collection(doc(firestore, "lobbies", lobby.docs[0].id), "players"),
+        await setDoc(
+            doc(firestore, "lobbies", code, "players", user.auth.uid),
             {
-                uid: user.uid,
-                username: user,
+                username: user.username,
             },
         );
     }

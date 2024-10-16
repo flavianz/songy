@@ -1,6 +1,7 @@
+import { User } from "firebase/auth";
+
 export interface FirestoreUser {
-    uid: string;
+    auth: User;
     username: string;
     level: number;
-    docId: string;
 }

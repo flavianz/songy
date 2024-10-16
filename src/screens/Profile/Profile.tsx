@@ -12,7 +12,7 @@ export default function Profile() {
     const [userData, setUserData] = useState<FirestoreUser | null>(null);
 
     useEffect(() => {
-        fetchUser(user.uid).then((data) => {
+        fetchUser(user.auth.uid).then((data) => {
             setUserData(data);
             setLoading(false);
         });
@@ -28,7 +28,7 @@ export default function Profile() {
 
     return (
         <div>
-            <p>Logged in as {user?.email}</p>
+            <p>Logged in as {user.auth.email}</p>
             <button type={"button"} onClick={() => signOut()}>
                 Sign Out
             </button>

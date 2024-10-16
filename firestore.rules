@@ -1,0 +1,25 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+  	function isSignedIn() {
+    	return request.auth != null && request.auth.token.email_verified;
+    }
+		match /users/{userDoc} {
+    	allow write: if isSignedIn() && request.auth.uid == request.resource.data.uid && 
+      		request.resource.data.keys().hasOnly(["uid", "username", "level"]);
+      allow read: if isSignedIn() && request.auth.uid == resource.data.uid;
+    }
+    
+    match /lobbies/{lobbyDoc} {
+    	allow read: if isSignedIn();
+      allow create: if isSignedIn();
+      
+      match /players/{playerDoc} {
+      	allow create: if isSignedIn();
+        allow update: if isSignedIn();
+        allow read: if isSignedIn();
+      }
+    }
+  }
+}
