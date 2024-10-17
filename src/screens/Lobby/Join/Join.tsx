@@ -1,5 +1,5 @@
-import { FormEvent, useState } from "react";
-import { doc, getDoc, updateDoc, arrayUnion } from "firebase/firestore";
+import { useEffect, useState } from "react";
+import { doc, getDoc, updateDoc } from "firebase/firestore";
 import { firestore } from "../../../firebase/firebase.ts";
 import { getUser } from "../../../context/AuthContext.tsx";
 import { ensureSignOut } from "../../../firebase/auth.ts";
@@ -16,34 +16,47 @@ export default function Join() {
     const [code, setCode] = useState("");
     const [error, setError] = useState("");
 
-    async function handleSubmit(e: FormEvent<HTMLFormElement>) {
-        e.preventDefault();
+    async function handleSubmit() {
         let lobby = await getDoc(doc(firestore, "lobbies", code));
         if (!lobby.exists()) {
             setError("Unknown lobby code");
             return;
         }
         if (
-            (lobby.data() as FirestoreLobby).players
-                .map((player) => player.uid)
-                .includes(user.auth.uid)
+            Object.keys((lobby.data() as FirestoreLobby).players).includes(
+                user.auth.uid,
+            )
         ) {
             navigate("/lobby/" + code);
             return;
         }
         await updateDoc(doc(firestore, "lobbies", code), {
-            players: arrayUnion({
-                uid: user.auth.uid,
-                username: user.username,
+            ["players." + user.auth.uid]: {
                 color: getRandomHex(),
-            }),
+                username: user.username,
+            },
+        });
+        await updateDoc(doc(firestore, "users", user.auth.uid), {
+            lobby: code,
         });
         navigate("/lobby/" + code);
     }
 
+    useEffect(() => {
+        if (user.lobby !== "") {
+            setCode(user.lobby);
+            handleSubmit();
+        }
+    });
+
     return (
         <div>
-            <form onSubmit={handleSubmit}>
+            <form
+                onSubmit={(e) => {
+                    e.preventDefault();
+                    handleSubmit();
+                }}
+            >
                 <input
                     type="text"
                     value={code}

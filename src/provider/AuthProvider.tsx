@@ -22,11 +22,11 @@ export function AuthProvider({
                 if (unsubscribe !== undefined) {
                     unsubscribe();
                 }
-                alert("resubscribe");
+                console.info("resubscribe");
                 unsubscribe = onSnapshot(
                     doc(firestore, "users", firebaseUser.uid),
                     async (doc) => {
-                        alert("fetch user");
+                        console.info("fetch user");
                         if (!doc.exists()) {
                             await auth.signOut();
                             return;

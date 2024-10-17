@@ -1,7 +1,7 @@
 import { ensureSignOut } from "../../../firebase/auth.ts";
 import { useState } from "react";
 import { FirestoreLobby } from "../../../firebase/types.ts";
-import { doc, onSnapshot } from "firebase/firestore";
+import { doc, onSnapshot, updateDoc, deleteField } from "firebase/firestore";
 import { Navigate, useNavigate, useParams } from "react-router-dom";
 import { firestore } from "../../../firebase/firebase.ts";
 import { getUser } from "../../../context/AuthContext.tsx";
@@ -30,9 +30,9 @@ export default function Lobby() {
         setLobbyData(doc.data() as FirestoreLobby);
         setLoading(false);
         if (
-            !(doc.data() as FirestoreLobby).players
-                .map((user) => user.uid)
-                .includes(user.auth.uid)
+            !Object.keys((doc.data() as FirestoreLobby).players).includes(
+                user.auth.uid,
+            )
         ) {
             unsub();
         }
@@ -46,11 +46,27 @@ export default function Lobby() {
         );
     }
 
+    async function handleQuit() {
+        console.log("1");
+        await updateDoc(doc(firestore, "lobbies", lobbyCode!), {
+            ["players." + user.auth.uid]: deleteField(),
+        });
+        console.log("2");
+        await updateDoc(doc(firestore, "users", user.auth.uid), {
+            lobby: "",
+        });
+        console.log("3");
+        unsub();
+        console.log("4");
+        navigate("/");
+    }
+
     return (
         <div>
             <p>Max Players: {lobbyData!.max_players}</p>
             <p>Players:</p>
-            {lobbyData!.players.map((player, key) => {
+            {Object.keys(lobbyData!.players).map((uid, key) => {
+                const player = lobbyData!.players[uid];
                 return (
                     <div style={{ background: "#" + player.color }} key={key}>
                         <p
@@ -60,13 +76,13 @@ export default function Lobby() {
                                     : "#FFFFFF",
                             }}
                         >
-                            {player.username} [{player.uid}]
+                            {player.username} [{uid}]
                         </p>
                     </div>
                 );
             })}
             <p>{error}</p>
-            <button onClick={() => navigate("/")}>Leave Lobby</button>
+            <button onClick={handleQuit}>Leave Lobby</button>
         </div>
     );
 }

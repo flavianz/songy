@@ -11,11 +11,12 @@ export interface FirestoreLobby {
     host: string;
     max_players: number;
     state: "idle" | "game";
-    players: FirestoreLobbyPlayer[];
+    players: {
+        [uid: string]: FirestoreLobbyPlayer;
+    };
 }
 
 export interface FirestoreLobbyPlayer {
-    uid: string;
     username: string;
     color: string;
 }
