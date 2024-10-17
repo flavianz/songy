@@ -5,9 +5,9 @@ import { FirestoreUser } from "../firebase/types.ts";
 import { doc, onSnapshot, Unsubscribe } from "firebase/firestore";
 
 export function AuthProvider({
-    children,
-    loadingComponent,
-}: {
+                                 children,
+                                 loadingComponent,
+                             }: {
     children: any;
     loadingComponent: ReactElement;
 }): ReactNode {

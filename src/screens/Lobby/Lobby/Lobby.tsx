@@ -1,14 +1,15 @@
 import { ensureSignOut } from "../../../firebase/auth.ts";
 import { useState } from "react";
 import { FirestoreLobby } from "../../../firebase/types.ts";
-import { doc, onSnapshot, updateDoc, deleteField } from "firebase/firestore";
+import { doc, onSnapshot, deleteField, writeBatch } from "firebase/firestore";
 import { Navigate, useNavigate, useParams } from "react-router-dom";
 import { firestore } from "../../../firebase/firebase.ts";
+import { wc_hex_is_light } from "../../../firebase/functions/utils.ts";
 import { getUser } from "../../../context/AuthContext.tsx";
 
 export default function Lobby() {
     ensureSignOut();
-    let user = getUser()!;
+    const user = getUser()!;
     let { lobbyCode } = useParams();
 
     const navigate = useNavigate();
@@ -47,23 +48,27 @@ export default function Lobby() {
     }
 
     async function handleQuit() {
+        const batch = writeBatch(firestore);
         console.log("1");
-        await updateDoc(doc(firestore, "lobbies", lobbyCode!), {
+        batch.update(doc(firestore, "lobbies", lobbyCode!), {
             ["players." + user.auth.uid]: deleteField(),
         });
         console.log("2");
-        await updateDoc(doc(firestore, "users", user.auth.uid), {
+        batch.update(doc(firestore, "users", user.auth.uid), {
             lobby: "",
         });
         console.log("3");
-        unsub();
+        await batch.commit();
         console.log("4");
         navigate("/");
     }
 
+    async function handleStartGame() {}
+
     return (
         <div>
             <p>Max Players: {lobbyData!.max_players}</p>
+            <p>Lobby Code: {lobbyCode}</p>
             <p>Players:</p>
             {Object.keys(lobbyData!.players).map((uid, key) => {
                 const player = lobbyData!.players[uid];
@@ -83,14 +88,9 @@ export default function Lobby() {
             })}
             <p>{error}</p>
             <button onClick={handleQuit}>Leave Lobby</button>
+            {lobbyData!.host === user.auth.uid && (
+                <button onClick={handleStartGame}>Start game</button>
+            )}
         </div>
     );
-}
-
-function wc_hex_is_light(color: string) {
-    const c_r = parseInt(color.substring(0, 2), 16);
-    const c_g = parseInt(color.substring(2, 4), 16);
-    const c_b = parseInt(color.substring(4, 6), 16);
-    const brightness = (c_r * 299 + c_g * 587 + c_b * 114) / 1000;
-    return brightness > 155;
 }

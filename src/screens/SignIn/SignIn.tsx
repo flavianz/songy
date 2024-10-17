@@ -3,8 +3,8 @@ import {
     firebaseSignInWithEmailAndPassword,
     signInWithGoogle,
 } from "../../firebase/auth.ts";
-import { getUser } from "../../context/AuthContext.tsx";
 import { Navigate, useNavigate } from "react-router-dom";
+import { getUser } from "../../context/AuthContext.tsx";
 
 export default function SignIn() {
     const navigate = useNavigate();
@@ -12,7 +12,7 @@ export default function SignIn() {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
 
-    let user = getUser();
+    const user = getUser();
     if (user) {
         return <Navigate to="/profile" />;
     }

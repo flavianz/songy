@@ -3,8 +3,8 @@ import {
     firebaseCreateUserWithEmailAndPassword,
     signInWithGoogle,
 } from "../../firebase/auth.ts";
-import { getUser } from "../../context/AuthContext.tsx";
 import { Navigate, useNavigate } from "react-router-dom";
+import { getUser } from "../../context/AuthContext.tsx";
 
 export default function Signup() {
     const navigate = useNavigate();
@@ -16,7 +16,9 @@ export default function Signup() {
     const [error, setError] = useState("");
     const [loading, setLoading] = useState(false);
 
-    if (getUser()) {
+    const user = getUser();
+
+    if (user) {
         return <Navigate to={"/profile"} />;
     }
 

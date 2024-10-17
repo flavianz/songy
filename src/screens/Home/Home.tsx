@@ -1,6 +1,6 @@
 import styles from "./Home.module.css";
-import { getUser } from "../../context/AuthContext.tsx";
 import { useNavigate } from "react-router-dom";
+import { getUser } from "../../context/AuthContext.tsx";
 
 export default function Home() {
     const navigate = useNavigate();

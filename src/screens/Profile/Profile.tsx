@@ -1,11 +1,11 @@
-import { getUser } from "../../context/AuthContext.tsx";
 import { ensureSignOut, signOut } from "../../firebase/auth.ts";
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { getUser } from "../../context/AuthContext.tsx";
 
 export default function Profile() {
     ensureSignOut();
-    let user = getUser()!;
+    const user = getUser()!;
 
     const navigate = useNavigate();
 

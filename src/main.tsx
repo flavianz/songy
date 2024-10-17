@@ -11,6 +11,7 @@ import EmailVerified from "./screens/EmailVerified/EmailVerified.tsx";
 import CheckInbox from "./screens/CheckInbox/CheckInbox.tsx";
 import Join from "./screens/Lobby/Join/Join.tsx";
 import Lobby from "./screens/Lobby/Lobby/Lobby.tsx";
+import Create from "./screens/Lobby/Create/Create.tsx";
 
 export const BASE_URL = "http://localhost:5137";
 
@@ -46,6 +47,10 @@ const browserRouter = createBrowserRouter([
     {
         path: "/lobby/:lobbyCode",
         element: <Lobby />,
+    },
+    {
+        path: "/create",
+        element: <Create />,
     },
 ]);
 

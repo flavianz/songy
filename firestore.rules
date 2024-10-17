@@ -5,13 +5,13 @@ service cloud.firestore {
         function isSignedIn() {
             return request.auth != null && request.auth.token.email_verified;
         }
-        match /users/userDoc {
+        match /users/{userDoc} {
             allow write: if isSignedIn() && request.auth.uid == request.resource.data.uid &&
                     request.resource.data.keys().hasOnly(["uid", "username", "level", "lobby"]);
             allow read: if isSignedIn() && request.auth.uid == resource.data.uid;
         }
 
-        match /lobbies/lobbyDoc {
+        match /lobbies/{lobbyDoc} {
             function isHost() {
                 return resource.data.host == request.auth.uid;
             }
@@ -19,11 +19,10 @@ service cloud.firestore {
             allow read: if isSignedIn();
             allow create: if isSignedIn() &&
                     get(/databases/$(database)/documents/users/$(request.auth.uid)).data.lobby == "";
-            allow update: if isSignedIn() && (isHost()
-                    || (request.resource.data.host == resource.data.host
-                    && request.resource.data.max_players == resource.data.max_players
-                    && request.resource.data.state == resource.data.state && resource.data.state == "idle" ))
-                    && request.resource.data.players.size() <= 10;
+            allow update: if isSignedIn() && request.resource.data.host == resource.data.host
+                    && request.resource.data.players.size() <= request.resource.data.max_players
+                    && (isHost() || (request.resource.data.max_players == resource.data.max_players
+                        && request.resource.data.state == resource.data.state));
         }
     }
 }
