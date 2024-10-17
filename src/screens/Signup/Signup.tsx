@@ -1,18 +1,24 @@
 import { FormEvent, useState } from "react";
-import { firebaseCreateUserWithEmailAndPassword } from "../../firebase/auth.ts";
+import {
+    firebaseCreateUserWithEmailAndPassword,
+    signInWithGoogle,
+} from "../../firebase/auth.ts";
 import { getUser } from "../../context/AuthContext.tsx";
-import { Navigate } from "react-router-dom";
+import { Navigate, useNavigate } from "react-router-dom";
 
 export default function Signup() {
-    if (getUser()) {
-        return <Navigate to={"/profile"} />;
-    }
+    const navigate = useNavigate();
+
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [confirmPassword, setConfirmPassword] = useState("");
 
     const [error, setError] = useState("");
     const [loading, setLoading] = useState(false);
+
+    if (getUser()) {
+        return <Navigate to={"/profile"} />;
+    }
 
     async function handleSubmit(e: FormEvent<HTMLFormElement>) {
         setLoading(true);
@@ -53,6 +59,15 @@ export default function Signup() {
                 />
                 <button type="submit">Sign Up</button>
             </form>
+            <button
+                onClick={() =>
+                    signInWithGoogle().then((e) => {
+                        if (e.operationType == "link") {
+                            navigate("/email_verified");
+                        }
+                    })
+                }
+            />
             <p>{error}</p>
             {loading && <p>loading</p>}
         </div>

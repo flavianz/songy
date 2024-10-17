@@ -7,7 +7,7 @@ service cloud.firestore {
         }
         match /users/{userDoc} {
             allow write: if isSignedIn() && request.auth.uid == request.resource.data.uid &&
-                    request.resource.data.keys().hasOnly(["uid", "username", "level"]);
+                    request.resource.data.keys().hasOnly(["uid", "username", "level", "lobby"]);
             allow read: if isSignedIn() && request.auth.uid == resource.data.uid;
         }
 
@@ -17,7 +17,8 @@ service cloud.firestore {
             }
 
             allow read: if isSignedIn();
-            allow create: if isSignedIn();
+            allow create: if isSignedIn() &&
+                    get(/databases/$(database)/documents/users/$(request.auth.uid)).data.lobby == "";
             allow update: if isSignedIn() && (isHost()
                     || (request.resource.data.host == resource.data.host
                     && request.resource.data.max_players == resource.data.max_players

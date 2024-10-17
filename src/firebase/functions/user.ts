@@ -7,6 +7,7 @@ export async function createFirebaseUser(uid: string, username: string) {
         uid: uid,
         username: username,
         level: 0,
+        lobby: "",
     });
 }
 

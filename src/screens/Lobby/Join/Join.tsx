@@ -23,14 +23,14 @@ export default function Join() {
             setError("Unknown lobby code");
             return;
         }
-        // if (
-        //     (lobby.data() as FirestoreLobby).players
-        //         .map((player) => player.uid)
-        //         .includes(user.auth.uid)
-        // ) {
-        //     navigate("/lobby/" + code);
-        //     return;
-        // }
+        if (
+            (lobby.data() as FirestoreLobby).players
+                .map((player) => player.uid)
+                .includes(user.auth.uid)
+        ) {
+            navigate("/lobby/" + code);
+            return;
+        }
         await updateDoc(doc(firestore, "lobbies", code), {
             players: arrayUnion({
                 uid: user.auth.uid,

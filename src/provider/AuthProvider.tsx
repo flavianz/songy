@@ -1,8 +1,8 @@
 import { ReactElement, ReactNode, useEffect, useState } from "react";
 import { AuthContext } from "../context/AuthContext";
-import { auth } from "../firebase/firebase.ts";
+import { auth, firestore } from "../firebase/firebase.ts";
 import { FirestoreUser } from "../firebase/types.ts";
-import { fetchUser } from "../firebase/functions/user.ts";
+import { doc, onSnapshot, Unsubscribe } from "firebase/firestore";
 
 export function AuthProvider({
     children,
@@ -14,17 +14,37 @@ export function AuthProvider({
     const [user, setUser] = useState<FirestoreUser | null>(null);
     const [loading, setLoading] = useState(true);
 
+    let unsubscribe: Unsubscribe;
+
     useEffect(() => {
         return auth.onAuthStateChanged((firebaseUser) => {
             if (firebaseUser) {
-                fetchUser(firebaseUser.uid).then((data) => {
-                    setUser({ ...data, auth: firebaseUser });
-                    setLoading(false);
-                });
+                if (unsubscribe !== undefined) {
+                    unsubscribe();
+                }
+                alert("resubscribe");
+                unsubscribe = onSnapshot(
+                    doc(firestore, "users", firebaseUser.uid),
+                    async (doc) => {
+                        alert("fetch user");
+                        if (!doc.exists()) {
+                            await auth.signOut();
+                            return;
+                        }
+                        setUser({
+                            ...(doc.data() as FirestoreUser),
+                            auth: firebaseUser,
+                        });
+                        setLoading(false);
+                    },
+                );
             } else {
+                if (unsubscribe !== undefined) {
+                    unsubscribe();
+                }
                 setUser(null);
+                setLoading(false);
             }
-            setLoading(false);
         });
     }, []);
 

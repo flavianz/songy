@@ -8,11 +8,14 @@ import { Navigate, useNavigate } from "react-router-dom";
 
 export default function SignIn() {
     const navigate = useNavigate();
-    if (getUser()) {
-        return <Navigate to="/profile" />;
-    }
+
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
+
+    let user = getUser();
+    if (user) {
+        return <Navigate to="/profile" />;
+    }
 
     function handleSubmit(e: FormEvent<HTMLFormElement>) {
         e.preventDefault();
@@ -41,8 +44,9 @@ export default function SignIn() {
             <button
                 onClick={() =>
                     signInWithGoogle().then((e) => {
-                        console.log(e);
-                        navigate("/email_verified");
+                        if (e.operationType == "link") {
+                            navigate("/email_verified");
+                        }
                     })
                 }
             >
