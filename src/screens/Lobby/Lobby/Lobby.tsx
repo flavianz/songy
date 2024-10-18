@@ -49,17 +49,15 @@ export default function Lobby() {
 
     async function handleQuit() {
         const batch = writeBatch(firestore);
-        console.log("1");
         batch.update(doc(firestore, "lobbies", lobbyCode!), {
             ["players." + user.auth.uid]: deleteField(),
         });
-        console.log("2");
         batch.update(doc(firestore, "users", user.auth.uid), {
             lobby: "",
         });
-        console.log("3");
+        console.log("1");
         await batch.commit();
-        console.log("4");
+        console.log("2");
         navigate("/");
     }
 

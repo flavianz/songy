@@ -1,16 +1,17 @@
 import { ensureSignOut } from "../../../firebase/auth.ts";
 import { Navigate, useNavigate } from "react-router-dom";
-import { doc, setDoc, updateDoc } from "firebase/firestore";
+import { doc, writeBatch } from "firebase/firestore";
 import { firestore } from "../../../firebase/firebase.ts";
 import {
     getRandomCode,
     getRandomHex,
 } from "../../../firebase/functions/utils.ts";
 import { getUser } from "../../../context/AuthContext.tsx";
+import { FormEvent, useState } from "react";
 
 export default function Create() {
     ensureSignOut();
-
+    const [max, setMax] = useState(0);
     const navigate = useNavigate();
 
     let user = getUser()!;
@@ -19,9 +20,11 @@ export default function Create() {
         return <Navigate to={"/join"} />;
     }
 
-    async function createLobby() {
+    async function createLobby(e: FormEvent<HTMLFormElement>) {
+        e.preventDefault();
         let code = getRandomCode();
-        await setDoc(doc(firestore, "lobbies", code), {
+        const batch = writeBatch(firestore);
+        batch.set(doc(firestore, "lobbies", code), {
             host: user.auth.uid,
             max_players: 10,
             state: "idle",
@@ -32,17 +35,27 @@ export default function Create() {
                 },
             },
         });
-        await updateDoc(doc(firestore, "users", user.auth.uid), {
+        batch.update(doc(firestore, "users", user.auth.uid), {
             lobby: code,
         });
+        await batch.commit();
         navigate("/lobby/" + code);
     }
 
-    createLobby();
-
     return (
         <div>
-            <p>creating lobby...</p>
+            <form onSubmit={(e) => createLobby(e)}>
+                <label>
+                    Max. Players
+                    <input
+                        type="numbers"
+                        max={10}
+                        value={max}
+                        onChange={(e) => setMax(parseInt(e.target.value))}
+                    />
+                    <button type={"submit"}>Create Lobby</button>
+                </label>
+            </form>
         </div>
     );
 }

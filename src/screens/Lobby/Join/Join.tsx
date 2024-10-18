@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { doc, getDoc, updateDoc } from "firebase/firestore";
+import { doc, getDoc, writeBatch } from "firebase/firestore";
 import { firestore } from "../../../firebase/firebase.ts";
 import { ensureSignOut } from "../../../firebase/auth.ts";
 import { useNavigate } from "react-router-dom";
@@ -31,13 +31,14 @@ export default function Join() {
             navigate("/lobby/" + lobbyCode);
             return;
         }
-        await updateDoc(doc(firestore, "lobbies", lobbyCode), {
+        const batch = writeBatch(firestore);
+        batch.update(doc(firestore, "lobbies", lobbyCode), {
             ["players." + user.auth.uid]: {
                 color: getRandomHex(),
                 username: user.username,
             },
         });
-        await updateDoc(doc(firestore, "users", user.auth.uid), {
+        batch.update(doc(firestore, "users", user.auth.uid), {
             lobby: lobbyCode,
         });
         navigate("/lobby/" + lobbyCode);
