@@ -23,6 +23,20 @@ service cloud.firestore {
                     && request.resource.data.players.size() <= request.resource.data.max_players
                     && (isHost() || (request.resource.data.max_players == resource.data.max_players
                         && request.resource.data.state == resource.data.state));
+            allow delete: if isSignedIn() && resource.data.players.size() <= 1;
+        }
+
+        match /games/{gamesDoc} {
+            function isHostingLobby() {
+                let userPath = /databases/$(database)/documents/users/$(request.auth.uid);
+                let lobbyPath = /databases/$(database)/documents/lobbies/$(get(userPath).data.lobby);
+
+                let isInLobby = get(userPath).data.lobby != "";
+                let isLobbyHost = get(lobbyPath).data.host == request.auth.uid;
+                return isInLobby && isLobbyHost;
+            }
+            allow create: if isSignedIn() && isHostingLobby();
+            allow read: if isSignedIn() && resource.data.players.keys().hasAll([request.auth.uid]);
         }
     }
 }

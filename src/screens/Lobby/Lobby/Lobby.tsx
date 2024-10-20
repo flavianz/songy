@@ -1,5 +1,5 @@
 import { ensureSignOut } from "../../../firebase/auth.ts";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { FirestoreLobby } from "../../../firebase/types.ts";
 import { doc, onSnapshot, deleteField, writeBatch } from "firebase/firestore";
 import { Navigate, useNavigate, useParams } from "react-router-dom";
@@ -22,22 +22,34 @@ export default function Lobby() {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
 
-    const unsub = onSnapshot(doc(firestore, "lobbies", lobbyCode), (doc) => {
-        if (!doc.exists()) {
+    useEffect(() => {
+        console.log("subscribed lobby");
+        const unsub = onSnapshot(
+            doc(firestore, "lobbies", lobbyCode),
+            (doc) => {
+                console.log("fetched lobby");
+                if (!doc.exists()) {
+                    unsub();
+                    setError("Lobby does not exist");
+                    return;
+                }
+                setLobbyData(doc.data() as FirestoreLobby);
+                setLoading(false);
+                if (
+                    !Object.keys(
+                        (doc.data() as FirestoreLobby).players,
+                    ).includes(user.auth.uid)
+                ) {
+                    unsub();
+                }
+            },
+        );
+
+        return () => {
+            console.log("unsub lobby");
             unsub();
-            setError("Lobby does not exist");
-            return;
-        }
-        setLobbyData(doc.data() as FirestoreLobby);
-        setLoading(false);
-        if (
-            !Object.keys((doc.data() as FirestoreLobby).players).includes(
-                user.auth.uid,
-            )
-        ) {
-            unsub();
-        }
-    });
+        };
+    }, []);
 
     if (loading) {
         return (
@@ -49,15 +61,18 @@ export default function Lobby() {
 
     async function handleQuit() {
         const batch = writeBatch(firestore);
-        batch.update(doc(firestore, "lobbies", lobbyCode!), {
-            ["players." + user.auth.uid]: deleteField(),
-        });
+        if (Object.keys(lobbyData!.players).length === 1) {
+            batch.delete(doc(firestore, "lobbies", lobbyCode!));
+        } else {
+            batch.update(doc(firestore, "lobbies", lobbyCode!), {
+                ["players." + user.auth.uid]: deleteField(),
+            });
+        }
         batch.update(doc(firestore, "users", user.auth.uid), {
             lobby: "",
         });
-        console.log("1");
+
         await batch.commit();
-        console.log("2");
         navigate("/");
     }
 

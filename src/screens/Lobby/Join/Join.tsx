@@ -41,6 +41,7 @@ export default function Join() {
         batch.update(doc(firestore, "users", user.auth.uid), {
             lobby: lobbyCode,
         });
+        await batch.commit();
         navigate("/lobby/" + lobbyCode);
     }
 

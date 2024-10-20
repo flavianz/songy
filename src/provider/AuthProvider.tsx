@@ -5,9 +5,9 @@ import { FirestoreUser } from "../firebase/types.ts";
 import { doc, onSnapshot, Unsubscribe } from "firebase/firestore";
 
 export function AuthProvider({
-                                 children,
-                                 loadingComponent,
-                             }: {
+    children,
+    loadingComponent,
+}: {
     children: any;
     loadingComponent: ReactElement;
 }): ReactNode {
@@ -26,7 +26,7 @@ export function AuthProvider({
                 unsubscribe = onSnapshot(
                     doc(firestore, "users", firebaseUser.uid),
                     async (doc) => {
-                        console.info("fetch user");
+                        console.info("fetch user: ", doc.data());
                         if (!doc.exists()) {
                             await auth.signOut();
                             return;
