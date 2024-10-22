@@ -82,6 +82,8 @@ export default function Lobby() {
 
     async function handleStartGame() {
         const startGame = httpsCallable(functions, "startGame");
+        let response = await startGame({ code: lobbyCode });
+        console.log(response);
     }
 
     return (
