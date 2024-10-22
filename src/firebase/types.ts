@@ -10,7 +10,7 @@ export interface FirestoreUser {
 export interface FirestoreLobby {
     host: string;
     max_players: number;
-    state: "idle" | "game";
+    game: string;
     players: {
         [uid: string]: FirestoreLobbyPlayer;
     };
@@ -19,4 +19,18 @@ export interface FirestoreLobby {
 export interface FirestoreLobbyPlayer {
     username: string;
     color: string;
+}
+
+export interface GamePlayer {
+    color: string;
+    points: number;
+    username: string;
+}
+
+export interface Game {
+    players: {
+        [uid: string]: GamePlayer;
+    };
+    total_rounds: number;
+    curr_round: number;
 }

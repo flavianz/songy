@@ -37,14 +37,14 @@ export default function Lobby() {
                     setError("Lobby does not exist");
                     return;
                 }
-                setLobbyData(doc.data() as FirestoreLobby);
+                let data = doc.data() as FirestoreLobby;
+                setLobbyData(data);
                 setLoading(false);
-                if (
-                    !Object.keys(
-                        (doc.data() as FirestoreLobby).players,
-                    ).includes(user.auth.uid)
-                ) {
-                    unsub();
+                if (!Object.keys(data.players).includes(user.auth.uid)) {
+                    navigate("/join");
+                }
+                if (data.game !== "") {
+                    navigate("/game/" + data.game);
                 }
             },
         );

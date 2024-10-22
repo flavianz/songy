@@ -2,6 +2,8 @@ export interface Song {
     author: string;
     title: string;
     lyrics: string;
+    album: string;
+    release: number;
 }
 
 export interface LobbyPlayer {
@@ -15,7 +17,7 @@ export interface Lobby {
     players: {
         [uid: string]: LobbyPlayer;
     };
-    state: "idle" | "game";
+    game: string;
 }
 
 export interface GamePlayer {
@@ -25,10 +27,9 @@ export interface GamePlayer {
 }
 
 export interface Game {
-    curr_round: number;
     players: {
         [uid: string]: GamePlayer;
     };
     total_rounds: number;
-    lyrics: string;
+    curr_round: number;
 }

@@ -1,9 +1,9 @@
 import { onCall } from "firebase-functions/v2/https";
 import { getFirestore } from "firebase-admin/firestore";
 import { initializeApp } from "firebase-admin/app";
-import { getRandomSong } from "./utils";
-import { Game, Lobby } from "./types";
+import { Game, GamePlayer, Lobby } from "./types";
 import { v4 as generateUUID } from "uuid";
+import { getRandomSong } from "./utils";
 
 initializeApp();
 const firestore = getFirestore();
@@ -17,7 +17,6 @@ exports.startGame = onCall(async (request) => {
     }
 
     let code: string = request.data.code;
-    let song = getRandomSong();
 
     let lobby = (await firestore.doc("/lobbies/" + code).get()).data() as
         | Lobby
@@ -31,12 +30,41 @@ exports.startGame = onCall(async (request) => {
 
     let uuid = generateUUID();
 
-    await firestore.doc("/games/" + uuid).create({
-        curr_round: 0,
-        lyrics: song.lyrics,
-        players: lobby.players,
+    let gamePlayers: { [uid: string]: GamePlayer } = {};
+    for (let player of Object.keys(lobby.players)) {
+        gamePlayers[player] = {
+            ...lobby.players[player],
+            points: 0,
+        };
+    }
+
+    let batch = firestore.batch();
+
+    batch.create(firestore.doc("/games/" + uuid), {
+        players: gamePlayers,
         total_rounds: 5,
+        curr_round: 0,
     } as Game);
+
+    batch.update(firestore.doc("/lobbies/" + code), {
+        game: uuid,
+    });
+
+    let song = getRandomSong();
+
+    batch.create(firestore.doc("/lobbies/" + code + "/rounds/0"), {
+        lyrics: song.lyrics,
+        round_start: Date.now() + 4 * 1000,
+        round_end: 0,
+    });
+
+    batch.create(firestore.doc("/lobbies/" + code + "/rounds/0s"), {
+        author: song.author,
+        album: song.album,
+        release: song.release,
+    });
+
+    await batch.commit();
 
     return { status: "ok", uuid: uuid };
 });
