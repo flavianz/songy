@@ -1,6 +1,5 @@
 import { collection, setDoc, getDoc, doc } from "firebase/firestore";
 import { firestore } from "../firebase.ts";
-import { FirestoreUser } from "../types.ts";
 
 export async function createFirebaseUser(uid: string, username: string) {
     return await setDoc(doc(collection(firestore, "users"), uid), {
@@ -9,8 +8,4 @@ export async function createFirebaseUser(uid: string, username: string) {
         level: 0,
         lobby: "",
     });
-}
-
-export async function fetchUser(uid: string): Promise<FirestoreUser> {
-    return (await getDoc(doc(firestore, "users", uid))).data() as FirestoreUser;
 }

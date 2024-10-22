@@ -4,8 +4,12 @@ import { FirestoreLobby } from "../../../firebase/types.ts";
 import { doc, onSnapshot, deleteField, writeBatch } from "firebase/firestore";
 import { Navigate, useNavigate, useParams } from "react-router-dom";
 import { firestore } from "../../../firebase/firebase.ts";
-import { wc_hex_is_light } from "../../../firebase/functions/utils.ts";
+import {
+    functions,
+    wc_hex_is_light,
+} from "../../../firebase/functions/utils.ts";
 import { getUser } from "../../../context/AuthContext.tsx";
+import { httpsCallable } from "firebase/functions";
 
 export default function Lobby() {
     ensureSignOut();
@@ -76,7 +80,9 @@ export default function Lobby() {
         navigate("/");
     }
 
-    async function handleStartGame() {}
+    async function handleStartGame() {
+        const startGame = httpsCallable(functions, "startGame");
+    }
 
     return (
         <div>

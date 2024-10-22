@@ -1,3 +1,4 @@
+import { getFunctions } from "firebase/functions";
 export function getRandomCode() {
     return Math.random().toString(36).slice(2, 6).toUpperCase();
 }
@@ -13,3 +14,5 @@ export function wc_hex_is_light(color: string) {
 export function getRandomHex() {
     return Math.floor(Math.random() * 16777215).toString(16);
 }
+
+export const functions = getFunctions();

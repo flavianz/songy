@@ -1,5 +1,11 @@
-import { onRequest } from "firebase-functions/v2/https";
+import { onCall } from "firebase-functions/v2/https";
+import { getFirestore } from "firebase-admin/lib/firestore";
+import { initializeApp } from "firebase-admin/lib/app";
+import songs from "./songs";
 
-exports.startGame = onRequest(async (req, res) => {
-    res.send("Hello World!");
+initializeApp();
+const firestore = getFirestore();
+
+exports.startGame = onCall(async (request) => {
+    let song = songs[Math.ceil(Math.random() * (songs.length - 1))];
 });

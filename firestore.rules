@@ -27,15 +27,6 @@ service cloud.firestore {
         }
 
         match /games/{gamesDoc} {
-            function isHostingLobby() {
-                let userPath = /databases/$(database)/documents/users/$(request.auth.uid);
-                let lobbyPath = /databases/$(database)/documents/lobbies/$(get(userPath).data.lobby);
-
-                let isInLobby = get(userPath).data.lobby != "";
-                let isLobbyHost = get(lobbyPath).data.host == request.auth.uid;
-                return isInLobby && isLobbyHost;
-            }
-            allow create: if isSignedIn() && isHostingLobby();
             allow read: if isSignedIn() && resource.data.players.keys().hasAll([request.auth.uid]);
         }
     }
