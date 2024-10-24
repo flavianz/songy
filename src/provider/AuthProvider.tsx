@@ -24,22 +24,31 @@ export function AuthProvider({
                 }
                 console.info("resubscribe");
                 console.log(firebaseUser);
-                unsubscribe = onSnapshot(
-                    doc(firestore, "users", firebaseUser.uid),
-                    async (doc) => {
-                        console.info("fetch user: ", doc.data());
-                        if (!doc.exists()) {
-                            console.log("signing out");
-                            await auth.signOut();
-                            return;
-                        }
-                        setUser({
-                            ...(doc.data() as FirestoreUser),
-                            auth: firebaseUser,
-                        });
-                        setLoading(false);
-                    },
-                );
+                try {
+                    unsubscribe = onSnapshot(
+                        doc(firestore, "users", firebaseUser.uid),
+                        async (doc) => {
+                            console.info("fetch user: ", doc.data());
+                            if (!doc.exists()) {
+                                console.log("signing out");
+                                await auth.signOut();
+                                return;
+                            }
+                            setUser({
+                                ...(doc.data() as FirestoreUser),
+                                auth: firebaseUser,
+                            });
+                            setLoading(false);
+                        },
+                        (e) => {
+                            console.log("error in user fetching", e.customData);
+                            console.error(e);
+                        },
+                    );
+                } catch (e) {
+                    console.log("error catch user auth");
+                    console.error(e);
+                }
             } else {
                 if (unsubscribe !== undefined) {
                     unsubscribe();

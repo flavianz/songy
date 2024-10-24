@@ -12,15 +12,17 @@ export default function GameScreen() {
     const { uuid } = useParams();
     const navigate = useNavigate();
 
-    if (typeof uuid !== "string") {
-        return <div>no uuid</div>;
-    }
-
     const [round, setRound] = useState<Round | null>(null);
     const [game, setGame] = useState<Game | null>(null);
     const [loading, setLoading] = useState<boolean>(true);
     const [error, setError] = useState("");
     const [countdown, setCountdown] = useState(0);
+    const [input, setInput] = useState<Input>({
+        album: "",
+        author: "",
+        release: 0,
+        title: "",
+    });
 
     useEffect(() => {
         console.log("subscribed game");
@@ -40,6 +42,10 @@ export default function GameScreen() {
                 }
                 setGame(data);
             },
+            (e) => {
+                console.log("Game error");
+                console.error(e);
+            },
         );
 
         return () => {
@@ -54,6 +60,7 @@ export default function GameScreen() {
         }
         console.log("subscribed round");
         let interval: NodeJS.Timeout;
+        console.log("/games/" + uuid + "/rounds/" + game.curr_round);
         const unsubRound = onSnapshot(
             doc(firestore, "/games/" + uuid + "/rounds/" + game.curr_round),
             (doc) => {
@@ -83,6 +90,12 @@ export default function GameScreen() {
         };
     }, [game?.curr_round]);
 
+    async function handleSubmit() {}
+
+    if (typeof uuid !== "string") {
+        return <div>no uuid</div>;
+    }
+
     if (loading) {
         return <div>loading...</div>;
     }
@@ -95,33 +108,31 @@ export default function GameScreen() {
         return <div>{error}</div>;
     }
 
-    if (countdown !== 0) {
+    if (countdown > 0) {
         return <div>countdown: {countdown}</div>;
     }
 
-    const [input, setInput] = useState<Input>({
-        album: "",
-        author: "",
-        release: 0,
-        title: "",
-    });
-
     return (
         <div>
-            <p>Round No. {game.curr_round}</p>
+            <p>Round No. {game.curr_round + 1}</p>
             <div>
                 <p>Players:</p>
-                {Object.keys(game.players).map((uid) => {
+                {Object.keys(game.players).map((uid, key) => {
                     const player = game.players[uid];
                     return (
-                        <div style={{ background: "#" + player.color }}>
+                        <div
+                            style={{ background: "#" + player.color }}
+                            key={key}
+                        >
                             {player.username} [{player.points}]
                         </div>
                     );
                 })}
             </div>
             <div>
-                <p>{round.lyrics}</p>
+                <pre>
+                    <p>{round.lyrics}</p>
+                </pre>
             </div>
             <div>
                 <label>
@@ -167,6 +178,7 @@ export default function GameScreen() {
                         }
                     />
                 </label>
+                <button onClick={handleSubmit}>Submit Answers</button>
             </div>
         </div>
     );

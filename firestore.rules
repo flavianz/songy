@@ -30,7 +30,7 @@ service cloud.firestore {
             allow read: if isSignedIn() && resource.data.players.keys().hasAll([request.auth.uid]);
 
             match /rounds/{roundDoc} {
-                allow read: if isSignedIn() && resource.data.players.keys().hasAll([request.auth.uid]) && resource.id.size() == 1 /*ensure it is not a solution*/;
+                allow read: if isSignedIn();
             }
         }
     }
