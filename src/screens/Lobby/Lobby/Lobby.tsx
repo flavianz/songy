@@ -38,14 +38,14 @@ export default function Lobby() {
                     return;
                 }
                 let data = doc.data() as FirestoreLobby;
-                setLobbyData(data);
-                setLoading(false);
                 if (!Object.keys(data.players).includes(user.auth.uid)) {
                     navigate("/join");
                 }
                 if (data.game !== "") {
                     navigate("/game/" + data.game);
                 }
+                setLobbyData(data);
+                setLoading(false);
             },
         );
 
@@ -82,8 +82,13 @@ export default function Lobby() {
 
     async function handleStartGame() {
         const startGame = httpsCallable(functions, "startGame");
-        let response = await startGame({ code: lobbyCode });
+        let response = await startGame({
+            code: lobbyCode,
+        });
         console.log(response);
+        if (response.data.status === "ok") {
+            navigate("/game/" + response.data.uuid);
+        }
     }
 
     return (

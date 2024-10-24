@@ -34,3 +34,15 @@ export interface Game {
     total_rounds: number;
     curr_round: number;
 }
+export interface Round {
+    lyrics: string;
+    round_start: number;
+    round_end: number;
+}
+
+export interface RoundSolution {
+    author: string;
+    title: string;
+    album: string;
+    release: number;
+}

@@ -23,11 +23,13 @@ export function AuthProvider({
                     unsubscribe();
                 }
                 console.info("resubscribe");
+                console.log(firebaseUser);
                 unsubscribe = onSnapshot(
                     doc(firestore, "users", firebaseUser.uid),
                     async (doc) => {
                         console.info("fetch user: ", doc.data());
                         if (!doc.exists()) {
+                            console.log("signing out");
                             await auth.signOut();
                             return;
                         }

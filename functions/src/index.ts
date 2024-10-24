@@ -52,16 +52,17 @@ exports.startGame = onCall(async (request) => {
 
     let song = getRandomSong();
 
-    batch.create(firestore.doc("/lobbies/" + code + "/rounds/0"), {
+    batch.create(firestore.doc("/games/" + uuid + "/rounds/0"), {
         lyrics: song.lyrics,
         round_start: Date.now() + 4 * 1000,
         round_end: 0,
     });
 
-    batch.create(firestore.doc("/lobbies/" + code + "/rounds/0s"), {
+    batch.create(firestore.doc("/games/" + uuid + "/rounds/0s"), {
         author: song.author,
         album: song.album,
         release: song.release,
+        title: song.title,
     });
 
     await batch.commit();

@@ -22,12 +22,16 @@ service cloud.firestore {
             allow update: if isSignedIn() && request.resource.data.host == resource.data.host
                     && request.resource.data.players.size() <= request.resource.data.max_players
                     && (isHost() || (request.resource.data.max_players == resource.data.max_players
-                        && request.resource.data.state == resource.data.state));
+                        && request.resource.data.game == resource.data.game));
             allow delete: if isSignedIn() && resource.data.players.size() <= 1;
         }
 
         match /games/{gamesDoc} {
             allow read: if isSignedIn() && resource.data.players.keys().hasAll([request.auth.uid]);
+
+            match /rounds/{roundDoc} {
+                allow read: if isSignedIn() && resource.data.players.keys().hasAll([request.auth.uid]) && resource.id.size() == 1 /*ensure it is not a solution*/;
+            }
         }
     }
 }
