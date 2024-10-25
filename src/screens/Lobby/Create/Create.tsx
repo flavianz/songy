@@ -1,4 +1,3 @@
-import { ensureSignOut } from "../../../firebase/auth.ts";
 import { Navigate, useNavigate } from "react-router-dom";
 import { doc, writeBatch } from "firebase/firestore";
 import { firestore } from "../../../firebase/firebase.ts";
@@ -10,7 +9,6 @@ import { getUser } from "../../../context/AuthContext.tsx";
 import { FormEvent, useState } from "react";
 
 export default function Create() {
-    ensureSignOut();
     const [max, setMax] = useState(0);
     const navigate = useNavigate();
 

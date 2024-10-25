@@ -18,6 +18,7 @@ export function AuthProvider({
 
     useEffect(() => {
         return auth.onAuthStateChanged((firebaseUser) => {
+            console.log("auth state changed", firebaseUser);
             if (firebaseUser) {
                 if (unsubscribe !== undefined) {
                     unsubscribe();

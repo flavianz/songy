@@ -1,4 +1,3 @@
-import { ensureSignOut } from "../../../firebase/auth.ts";
 import { useEffect, useState } from "react";
 import { FirestoreLobby } from "../../../firebase/types.ts";
 import { doc, onSnapshot, deleteField, writeBatch } from "firebase/firestore";
@@ -12,7 +11,6 @@ import { getUser } from "../../../context/AuthContext.tsx";
 import { httpsCallable } from "firebase/functions";
 
 export default function Lobby() {
-    ensureSignOut();
     const user = getUser()!;
     let { lobbyCode } = useParams();
 
@@ -82,9 +80,9 @@ export default function Lobby() {
 
     async function handleStartGame() {
         const startGame = httpsCallable(functions, "startGame");
-        let response = await startGame({
+        let response = (await startGame({
             code: lobbyCode,
-        });
+        })) as { data: { status: string; uuid?: string } };
         console.log(response);
         if (response.data.status === "ok") {
             navigate("/game/" + response.data.uuid);

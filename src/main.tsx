@@ -13,6 +13,7 @@ import Join from "./screens/Lobby/Join/Join.tsx";
 import Lobby from "./screens/Lobby/Lobby/Lobby.tsx";
 import Create from "./screens/Lobby/Create/Create.tsx";
 import GameScreen from "./screens/Game/GameScreen.tsx";
+import EnsureSignIn from "./provider/EnsureSignIn.tsx";
 
 export const BASE_URL = "http://localhost:5137";
 
@@ -27,7 +28,11 @@ const browserRouter = createBrowserRouter([
     },
     {
         path: "/profile",
-        element: <Profile />,
+        element: (
+            <EnsureSignIn>
+                <Profile />
+            </EnsureSignIn>
+        ),
     },
     {
         path: "/signup",
@@ -35,27 +40,51 @@ const browserRouter = createBrowserRouter([
     },
     {
         path: "/email_verified",
-        element: <EmailVerified />,
+        element: (
+            <EnsureSignIn>
+                <EmailVerified />
+            </EnsureSignIn>
+        ),
     },
     {
         path: "/check_inbox",
-        element: <CheckInbox />,
+        element: (
+            <EnsureSignIn allowEmailUnverified>
+                <CheckInbox />
+            </EnsureSignIn>
+        ),
     },
     {
         path: "/join",
-        element: <Join />,
+        element: (
+            <EnsureSignIn>
+                <Join />
+            </EnsureSignIn>
+        ),
     },
     {
         path: "/lobby/:lobbyCode",
-        element: <Lobby />,
+        element: (
+            <EnsureSignIn>
+                <Lobby />
+            </EnsureSignIn>
+        ),
     },
     {
         path: "/create",
-        element: <Create />,
+        element: (
+            <EnsureSignIn>
+                <Create />
+            </EnsureSignIn>
+        ),
     },
     {
         path: "/game/:uuid",
-        element: <GameScreen />,
+        element: (
+            <EnsureSignIn>
+                <GameScreen />
+            </EnsureSignIn>
+        ),
     },
 ]);
 

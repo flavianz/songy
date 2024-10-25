@@ -1,16 +1,13 @@
 import { useEffect, useState } from "react";
 import { doc, onSnapshot } from "firebase/firestore";
-import { useNavigate, useParams } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import { Game, Round } from "../../firebase/types.ts";
 import { firestore } from "../../firebase/firebase.ts";
-import { ensureSignOut } from "../../firebase/auth.ts";
 import { getUser } from "../../context/AuthContext.tsx";
 
 export default function GameScreen() {
-    ensureSignOut();
     let user = getUser()!;
     const { uuid } = useParams();
-    const navigate = useNavigate();
 
     const [round, setRound] = useState<Round | null>(null);
     const [game, setGame] = useState<Game | null>(null);

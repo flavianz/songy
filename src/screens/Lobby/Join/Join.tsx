@@ -1,15 +1,12 @@
 import { useEffect, useState } from "react";
 import { doc, getDoc, writeBatch } from "firebase/firestore";
 import { firestore } from "../../../firebase/firebase.ts";
-import { ensureSignOut } from "../../../firebase/auth.ts";
 import { useNavigate } from "react-router-dom";
 import { FirestoreLobby } from "../../../firebase/types.ts";
 import { getRandomHex } from "../../../firebase/functions/utils.ts";
 import { getUser } from "../../../context/AuthContext.tsx";
 
 export default function Join() {
-    ensureSignOut();
-
     const user = getUser()!;
 
     const navigate = useNavigate();
