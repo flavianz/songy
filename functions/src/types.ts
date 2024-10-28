@@ -33,3 +33,10 @@ export interface Game {
     total_rounds: number;
     curr_round: number;
 }
+
+export interface Answers {
+    author: string;
+    title: string;
+    album: string;
+    release: number;
+}

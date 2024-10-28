@@ -1,7 +1,7 @@
 import { onCall } from "firebase-functions/v2/https";
 import { getFirestore } from "firebase-admin/firestore";
 import { initializeApp } from "firebase-admin/app";
-import { Game, GamePlayer, Lobby } from "./types";
+import { Answers, Game, GamePlayer, Lobby } from "./types";
 import { v4 as generateUUID } from "uuid";
 import { getRandomSong } from "./utils";
 
@@ -68,4 +68,20 @@ exports.startGame = onCall(async (request) => {
     await batch.commit();
 
     return { status: "ok", uuid: uuid };
+});
+
+exports.submitGuess = onCall(async (request) => {
+    if (!request.auth) {
+        return { status: "missing permission" };
+    }
+    if (
+        typeof request.data.code !== "string" ||
+        typeof request.data.answers !== "object"
+    ) {
+        return { status: "invalid data" };
+    }
+    let answers = request.data.answers as Answers;
+    if (typeof answers.album) {
+    }
+    let code: string = request.data.code;
 });
