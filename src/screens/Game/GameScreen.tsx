@@ -13,7 +13,7 @@ export default function GameScreen() {
     const [game, setGame] = useState<Game | null>(null);
     const [loading, setLoading] = useState<boolean>(true);
     const [error, setError] = useState("");
-    const [countdown, setCountdown] = useState(0);
+    const [countdown, setCountdown] = useState(3);
     const [input, setInput] = useState<Input>({
         album: "",
         author: "",
