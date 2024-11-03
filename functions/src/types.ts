@@ -30,6 +30,12 @@ export interface Game {
     players: {
         [uid: string]: GamePlayer;
     };
+    rounds: {
+        lyrics: string;
+        start: number;
+        end: number;
+    }[];
+    solutions: Guess[];
     total_rounds: number;
     curr_round: number;
 }
@@ -39,4 +45,10 @@ export interface Answers {
     title: string;
     album: string;
     release: number;
+}
+export type Guess = Answers;
+
+export interface Guesses {
+    solution: Guess;
+    [uid: string]: Guess;
 }
