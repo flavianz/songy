@@ -43,6 +43,14 @@ service cloud.firestore {
                 allow update: if isSignedIn() && isValidGuess(request.resource.data[request.auth.uid])
                     && onlyChangedHimself(request, resource) && isDuringRound(request);
             }
+
+            match /lyrics/{lyricsDoc} {
+                function isReleased(request, resource) {
+                    return request.time.toMillis() >= resource.data.release_at;
+                }
+
+                allow read: if isSignedIn() && isReleased(request, resource);
+            }
         }
     }
 }

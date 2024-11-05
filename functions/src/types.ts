@@ -45,5 +45,5 @@ export type Guess = Answers;
 
 export interface Guesses {
     solution: Guess;
-    [uid: string]: Guess;
+    [uid: string]: Guess | null;
 }

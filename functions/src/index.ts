@@ -1,14 +1,17 @@
 import { onCall } from "firebase-functions/v2/https";
 import { onDocumentUpdatedWithAuthContext } from "firebase-functions/v2/firestore";
-import { getFirestore } from "firebase-admin/firestore";
+import { getFirestore, FieldValue } from "firebase-admin/firestore";
 import { initializeApp } from "firebase-admin/app";
-import { Answers, Game, GamePlayer, Lobby } from "./types";
+import { Answers, Game, GamePlayer, Guesses, Lobby } from "./types";
 import { v4 as generateUUID } from "uuid";
 import { getRandomSong } from "./utils";
 import { BAD_REQUEST, FORBIDDEN, OK, UNAUTHORIZED } from "./responses";
+import { setGlobalOptions } from "firebase-functions/v2";
 
 initializeApp();
 const firestore = getFirestore();
+
+setGlobalOptions({ region: "europe-west4" });
 
 exports.startGame = onCall(async (request) => {
     if (!request.auth) {
@@ -73,15 +76,48 @@ exports.startGame = onCall(async (request) => {
 });
 
 exports.submitguess = onDocumentUpdatedWithAuthContext(
-    "/games/{gameDoc}/guesses/{guessDoc}/",
-    (event) => {
+    "/games/{gameDoc}/guesses/{roundDoc}",
+    async (event) => {
+        // user ensured to be logged in
         if (!event.data) {
             console.error("Document updated did not contain any data");
             return;
         }
-        let after = event.data.after.data();
+        let after = event.data.after.data() as Guesses;
 
-        console.log("after", Object.entries(after));
+        let solution = after.solution;
+        let my_guess = after[event.authId as string];
+
+        let round_points = 0;
+        if (solution.title.toLowerCase() === my_guess.title.toLowerCase()) {
+            round_points += 10;
+        }
+        if (solution.album.toLowerCase() === my_guess.album.toLowerCase()) {
+            round_points += 10;
+        }
+        if (solution.author.toLowerCase() === my_guess.author.toLowerCase()) {
+            round_points += 10;
+        }
+        round_points += Math.pow(
+            10,
+            Math.abs(solution.release - my_guess.release),
+        );
+
+        let batch = firestore.batch();
+
+        batch.update(firestore.doc("/games/" + event.params.gameDoc), {
+            [(("players." + event.authId) as string) + ".points"]:
+                FieldValue.increment(round_points),
+        });
+
+        if (!Object.values(after).includes(null)) {
+            // all have guessed
+            // no transaction needed, as this is the only place where curr_round is modified
+            await firestore.doc("/games/" + event.params.gameDoc).update({
+                curr_round: FieldValue.increment(1),
+                round_start: Date.now() + 8300,
+            });
+        }
     },
 );
 //
