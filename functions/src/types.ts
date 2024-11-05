@@ -30,12 +30,7 @@ export interface Game {
     players: {
         [uid: string]: GamePlayer;
     };
-    rounds: {
-        lyrics: string;
-        start: number;
-        end: number;
-    }[];
-    solutions: Guess[];
+    round_start: number;
     total_rounds: number;
     curr_round: number;
 }

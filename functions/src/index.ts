@@ -1,4 +1,4 @@
-import { onCall } from "firebase-functions/v2/https";
+import { onCall, onRequest } from "firebase-functions/v2/https";
 import { getFirestore } from "firebase-admin/firestore";
 import { initializeApp } from "firebase-admin/app";
 import { Answers, Game, GamePlayer, Guesses, Lobby } from "./types";
@@ -46,19 +46,10 @@ exports.startGame = onCall(async (request) => {
 
     let batch = firestore.batch();
 
-    let song = getRandomSong();
-
     batch.create(firestore.doc("/games/" + uuid), {
         players: gamePlayers,
         total_rounds: 5,
-        rounds: [
-            {
-                start: Date.now() + 3300, // + 0.3 s for network latency,
-                end: Date.now() + 90000 + 3300,
-                lyrics: song.lyrics,
-            },
-        ],
-        solutions: [],
+        round_start: Date.now() + 3300, // 3 seconds until start, 300 ms latency puffer
         curr_round: 0,
     } as Game);
 
@@ -66,18 +57,28 @@ exports.startGame = onCall(async (request) => {
         game: uuid,
     });
 
-    batch.create(firestore.doc("/games/" + uuid + "/guesses/0"), {
-        solution: {
-            title: song.title,
-            album: song.album,
-            author: song.author,
-            release: song.release,
-        } as Answers,
-    });
+    for (let i = 0; i < 5; i++) {
+        let song = getRandomSong();
+        batch.create(
+            firestore.doc("/games/" + uuid + "/guesses/" + i.toString()),
+            {
+                solution: {
+                    title: song.title,
+                    album: song.album,
+                    author: song.author,
+                    release: song.release,
+                } as Answers,
+            },
+        );
+    }
 
     await batch.commit();
 
     return OK({ uuid: uuid });
+});
+
+exports.roundEnd = onRequest((request, response) => {
+    console.log("Received roundEnd", request);
 });
 
 exports.submitGuess = onCall(async (request) => {
