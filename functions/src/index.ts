@@ -75,8 +75,12 @@ exports.startGame = onCall(async (request) => {
     return OK({ uuid: uuid });
 });
 
-exports.submitguess = onDocumentUpdatedWithAuthContext(
-    "/games/{gameDoc}/guesses/{roundDoc}",
+exports.submitGuess = onDocumentUpdatedWithAuthContext(
+    {
+        document: "/games/{gameDoc}/guesses/{roundDoc}",
+        region: "europe-west4",
+        database: "(default)",
+    },
     async (event) => {
         // user ensured to be logged in
         if (!event.data) {
