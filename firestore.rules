@@ -47,7 +47,7 @@ service cloud.firestore {
             match /lyrics/{lyricsDoc} {
                 function isReleased(request, gameDoc) {
                     return int(lyricsDoc) == gameDoc.data.curr_round ?
-                            request.time <= gameDoc.data.round_start :
+                            request.time >= gameDoc.data.round_start :
                             int(lyricsDoc) < gameDoc.data.curr_round;
                 }
 

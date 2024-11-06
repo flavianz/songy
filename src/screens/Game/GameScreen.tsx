@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { doc, onSnapshot } from "firebase/firestore";
+import { doc, getDoc, onSnapshot } from "firebase/firestore";
 import { useParams } from "react-router-dom";
 import { Game, Round } from "../../firebase/types.ts";
 import { firestore } from "../../firebase/firebase.ts";
@@ -9,8 +9,8 @@ export default function GameScreen() {
     let user = getUser()!;
     const { uuid } = useParams();
 
-    const [round, setRound] = useState<Round | null>(null);
     const [game, setGame] = useState<Game | null>(null);
+    const [lyrics, setLyrics] = useState<string | null>(null);
     const [loading, setLoading] = useState<boolean>(true);
     const [error, setError] = useState("");
     const [countdown, setCountdown] = useState(3);
@@ -38,6 +38,7 @@ export default function GameScreen() {
                     setError("Not in game");
                 }
                 setGame(data);
+                setLoading(false);
             },
             (e) => {
                 console.log("Game error");
@@ -51,40 +52,24 @@ export default function GameScreen() {
         };
     }, []);
 
+    async function fetchLyrics() {
+        if (!game) {
+            return;
+        }
+        let lyrics = await getDoc(
+            doc(firestore, "/games/" + uuid + "/lyrics/" + game.curr_round),
+        );
+        if (!lyrics.exists()) {
+            setError("Internal Error: Access to lyrics denied");
+        }
+        setLyrics(lyrics.data()?.lyrics);
+    }
+
     useEffect(() => {
         if (!game) {
             return;
         }
-        console.log("subscribed round");
-        let interval: NodeJS.Timeout;
-        console.log("/games/" + uuid + "/rounds/" + game.curr_round);
-        const unsubRound = onSnapshot(
-            doc(firestore, "/games/" + uuid + "/rounds/" + game.curr_round),
-            (doc) => {
-                console.log("refetched round");
-                if (!doc.exists()) {
-                    unsubRound();
-                    setError("Round does not exist");
-                    return;
-                }
-                let round = doc.data() as Round;
-                setRound(round);
-
-                function updateCountdown() {
-                    setCountdown(
-                        Math.ceil((round.round_start - Date.now()) / 1000),
-                    );
-                }
-
-                interval = setInterval(updateCountdown, 1000);
-                setLoading(false);
-            },
-        );
-        return () => {
-            setGame(null);
-            unsubRound();
-            clearInterval(interval);
-        };
+        setTimeout(fetchLyrics, Math.max(game.round_start - Date.now(), 0));
     }, [game?.curr_round]);
 
     async function handleSubmit() {}

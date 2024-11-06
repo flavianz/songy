@@ -31,8 +31,10 @@ export interface Game {
     players: {
         [uid: string]: GamePlayer;
     };
+    round_start: number;
     total_rounds: number;
     curr_round: number;
+    max_round_end: number;
 }
 export interface Round {
     lyrics: string;

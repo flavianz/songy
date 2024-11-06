@@ -1,5 +1,5 @@
 import { onCall } from "firebase-functions/v2/https";
-import { onDocumentUpdatedWithAuthContext } from "firebase-functions/v2/firestore";
+import functions = require("firebase-functions");
 import { getFirestore, FieldValue } from "firebase-admin/firestore";
 import { initializeApp } from "firebase-admin/app";
 import { Answers, Game, GamePlayer, Guesses, Lobby } from "./types";
@@ -44,16 +44,25 @@ exports.startGame = onCall(async (request) => {
 
     let batch = firestore.batch();
 
+    const round_length = 1.5 * 60 * 1000;
+
     batch.create(firestore.doc("/games/" + uuid), {
         players: gamePlayers,
         total_rounds: 5,
         round_start: Date.now() + 3300, // 3 seconds until start, 300 ms latency puffer
         curr_round: 0,
+        max_round_end: Date.now() + round_length + 3300,
     } as Game);
 
     batch.update(firestore.doc("/lobbies/" + code), {
         game: uuid,
     });
+
+    let empty_guesses: { [id: string]: null } = {};
+
+    for (let uid of Object.keys(lobby.players)) {
+        empty_guesses[uid] = null;
+    }
 
     for (let i = 0; i < 5; i++) {
         let song = getRandomSong();
@@ -66,6 +75,13 @@ exports.startGame = onCall(async (request) => {
                     author: song.author,
                     release: song.release,
                 } as Answers,
+                ...empty_guesses,
+            },
+        );
+        batch.create(
+            firestore.doc("/games/" + uuid + "/lyrics/" + i.toString()),
+            {
+                lyrics: song.lyrics,
             },
         );
     }
@@ -75,22 +91,23 @@ exports.startGame = onCall(async (request) => {
     return OK({ uuid: uuid });
 });
 
-exports.submitGuess = onDocumentUpdatedWithAuthContext(
-    {
-        document: "/games/{gameDoc}/guesses/{roundDoc}",
-        region: "europe-west4",
-        database: "(default)",
-    },
-    async (event) => {
+// using 1st gen api because 2nd gen is not working with auth context
+// (not detecting the firestore multi-region database)
+exports.submitGuess = functions
+    .region("europe-west1")
+    .firestore.document("/games/{gameDoc}/guesses/{roundDoc}")
+    .onUpdate(async (event, context) => {
         // user ensured to be logged in
-        if (!event.data) {
-            console.error("Document updated did not contain any data");
+        if (!context.auth) {
+            console.error("guess doc updated without auth context");
             return;
         }
-        let after = event.data.after.data() as Guesses;
+        const authId = context.auth.uid;
+
+        let after = event.after.data() as Guesses;
 
         let solution = after.solution;
-        let my_guess = after[event.authId as string] as Answers;
+        let my_guess = after[authId as string] as Answers;
 
         let round_points = 0;
         if (solution.title.toLowerCase() === my_guess.title.toLowerCase()) {
@@ -110,84 +127,21 @@ exports.submitGuess = onDocumentUpdatedWithAuthContext(
 
         let batch = firestore.batch();
 
-        batch.update(firestore.doc("/games/" + event.params.gameDoc), {
-            [(("players." + event.authId) as string) + ".points"]:
+        batch.update(firestore.doc("/games/" + context.params.gameDoc), {
+            [(("players." + authId) as string) + ".points"]:
                 FieldValue.increment(round_points),
         });
 
+        const round_length = 1.5 * 60 * 1000;
+
         if (!Object.values(after).includes(null)) {
             // all have guessed
-            batch.update(firestore.doc("/games/" + event.params.gameDoc), {
+            batch.update(firestore.doc("/games/" + context.params.gameDoc), {
                 curr_round: FieldValue.increment(1),
                 round_start: Date.now() + 8300,
+                max_round_end: Date.now() + round_length + 8300,
             });
         }
 
         await batch.commit();
-    },
-);
-//
-// exports.submitGuess = onCall(async (request) => {
-//     if (!request.auth) {
-//         return UNAUTHORIZED;
-//     }
-//
-//     //ensure answers are in payload
-//     if (
-//         typeof request.data.code !== "string" ||
-//         typeof request.data.answers !== "object"
-//     ) {
-//         return BAD_REQUEST;
-//     }
-//     if (
-//         !(
-//             typeof request.data.album === "string" &&
-//             typeof request.data.title === "string" &&
-//             typeof request.data.release === "number" &&
-//             typeof request.data.author === "string"
-//         )
-//     ) {
-//         return BAD_REQUEST;
-//     }
-//
-//     let answers = request.data.answers as Answers;
-//
-//     // retrieve uuid
-//     if (typeof request.data.uuid !== "string") {
-//         return BAD_REQUEST;
-//     }
-//     let uuid: string = request.data.uuid;
-//
-//     let game_snapshot = await firestore.doc("/games/" + uuid).get();
-//     if (!game_snapshot.exists) {
-//         return BAD_REQUEST;
-//     }
-//
-//     // ensure user is in game
-//     let game = game_snapshot.data() as Game;
-//     if (!Object.keys(game).includes(request.auth.uid)) {
-//         return FORBIDDEN;
-//     }
-//
-//     let guesses_snapshot = await firestore
-//         .doc("/games/" + uuid + "/guesses/0")
-//         .get();
-//     if (!guesses_snapshot.exists) {
-//         return INTERNAL_ERROR;
-//     }
-//     let guesses_doc = guesses_snapshot.data() as Guesses;
-//
-//     // check if user has already submitted a guess
-//     if (request.auth.uid in guesses_doc) {
-//         return FORBIDDEN;
-//     }
-//
-//     let end = game.rounds[game.rounds.length - 1].end;
-//     if (end + 300 < Date.now()) {
-//         // time expired, with 300 ms buffer to avoid unexpected behavior
-//         return FORBIDDEN;
-//     }
-//
-//     if (end === 0) {
-//     }
-// });
+    });
