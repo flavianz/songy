@@ -45,11 +45,13 @@ service cloud.firestore {
             }
 
             match /lyrics/{lyricsDoc} {
-                function isReleased(request, resource) {
-                    return request.time.toMillis() >= resource.data.release_at;
+                function isReleased(request, gameDoc) {
+                    return int(lyricsDoc) == gameDoc.data.curr_round ?
+                            request.time <= gameDoc.data.round_start :
+                            int(lyricsDoc) < gameDoc.data.curr_round;
                 }
 
-                allow read: if isSignedIn() && isReleased(request, resource);
+                allow read: if isSignedIn() && isReleased(request, get(/databases/$(database)/documents/games/$(gamesDoc)));
             }
         }
     }

@@ -86,7 +86,7 @@ exports.submitguess = onDocumentUpdatedWithAuthContext(
         let after = event.data.after.data() as Guesses;
 
         let solution = after.solution;
-        let my_guess = after[event.authId as string];
+        let my_guess = after[event.authId as string] as Answers;
 
         let round_points = 0;
         if (solution.title.toLowerCase() === my_guess.title.toLowerCase()) {
@@ -98,10 +98,11 @@ exports.submitguess = onDocumentUpdatedWithAuthContext(
         if (solution.author.toLowerCase() === my_guess.author.toLowerCase()) {
             round_points += 10;
         }
-        round_points += Math.pow(
-            10,
-            Math.abs(solution.release - my_guess.release),
-        );
+
+        round_points = Math.max(
+            10 - Math.abs(solution.release - my_guess.release),
+            0,
+        ); // possibly implement another way of calculating points
 
         let batch = firestore.batch();
 
@@ -112,12 +113,13 @@ exports.submitguess = onDocumentUpdatedWithAuthContext(
 
         if (!Object.values(after).includes(null)) {
             // all have guessed
-            // no transaction needed, as this is the only place where curr_round is modified
-            await firestore.doc("/games/" + event.params.gameDoc).update({
+            batch.update(firestore.doc("/games/" + event.params.gameDoc), {
                 curr_round: FieldValue.increment(1),
                 round_start: Date.now() + 8300,
             });
         }
+
+        await batch.commit();
     },
 );
 //
