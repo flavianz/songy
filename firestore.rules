@@ -37,7 +37,7 @@ service cloud.firestore {
                     return request.resource.data.diff(resource.data).changedKeys().hasOnly(request.auth.uid);
                 }
                 function isDuringRound(request) {
-                    return get(/databases/$(database)/documents/games/$(gamesDoc)).data.curr_round == request.resource.id;
+                    return get(/databases/$(database)/documents/games/$(gamesDoc)).data.curr_round == guessDoc;
                 }
 
                 allow update: if isSignedIn() && isValidGuess(request.resource.data[request.auth.uid])
@@ -47,7 +47,7 @@ service cloud.firestore {
             match /lyrics/{lyricsDoc} {
                 function isReleased(request, gameDoc) {
                     return int(lyricsDoc) == gameDoc.data.curr_round ?
-                            request.time >= gameDoc.data.round_start :
+                            request.time.toMillis() >= gameDoc.data.round_start :
                             int(lyricsDoc) < gameDoc.data.curr_round;
                 }
 

@@ -25,6 +25,7 @@ export interface GamePlayer {
     color: string;
     points: number;
     username: string;
+    last_guess_round: number;
 }
 
 export interface Game {

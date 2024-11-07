@@ -39,6 +39,7 @@ exports.startGame = onCall(async (request) => {
         gamePlayers[player] = {
             ...lobby.players[player],
             points: 0,
+            last_guess_round: -1,
         };
     }
 
@@ -128,8 +129,10 @@ exports.submitGuess = functions
         let batch = firestore.batch();
 
         batch.update(firestore.doc("/games/" + context.params.gameDoc), {
-            [(("players." + authId) as string) + ".points"]:
-                FieldValue.increment(round_points),
+            [("players." + authId) as string]: {
+                points: FieldValue.increment(round_points),
+                last_guess_round: context.params.gameDoc,
+            },
         });
 
         const round_length = 1.5 * 60 * 1000;
