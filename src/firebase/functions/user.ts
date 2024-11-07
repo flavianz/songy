@@ -1,4 +1,4 @@
-import { collection, setDoc, getDoc, doc } from "firebase/firestore";
+import { collection, setDoc, doc } from "firebase/firestore";
 import { firestore } from "../firebase.ts";
 
 export async function createFirebaseUser(uid: string, username: string) {

@@ -2,11 +2,8 @@ import { useEffect, useState } from "react";
 import { FirestoreLobby } from "../../../firebase/types.ts";
 import { doc, onSnapshot, deleteField, writeBatch } from "firebase/firestore";
 import { Navigate, useNavigate, useParams } from "react-router-dom";
-import { firestore } from "../../../firebase/firebase.ts";
-import {
-    functions,
-    wc_hex_is_light,
-} from "../../../firebase/functions/utils.ts";
+import { firestore, functions } from "../../../firebase/firebase.ts";
+import { wc_hex_is_light } from "../../../firebase/functions/utils.ts";
 import { getUser } from "../../../context/AuthContext.tsx";
 import { httpsCallable } from "firebase/functions";
 
@@ -82,10 +79,10 @@ export default function Lobby() {
         const startGame = httpsCallable(functions, "startGame");
         let response = (await startGame({
             code: lobbyCode,
-        })) as { data: { status: string; uuid?: string } };
+        })) as { data: { code: string; data?: { uuid: string } } };
         console.log(response);
-        if (response.data.status === "ok") {
-            navigate("/game/" + response.data.uuid);
+        if (response.data.code === "100") {
+            navigate("/game/" + response.data.data?.uuid);
         }
     }
 

@@ -34,14 +34,17 @@ service cloud.firestore {
                     return guess.album is string && guess.author is string && guess.release is int && guess.title is string;
                 }
                 function onlyChangedHimself(request, resource) {
-                    return request.resource.data.diff(resource.data).changedKeys().hasOnly(request.auth.uid);
+                    return request.resource.data.diff(resource.data).changedKeys().hasOnly([request.auth.uid]);
                 }
-                function isDuringRound(request) {
-                    return get(/databases/$(database)/documents/games/$(gamesDoc)).data.curr_round == guessDoc;
+                function isDuringRound() {
+                    return get(/databases/$(database)/documents/games/$(gamesDoc)).data.curr_round == int(guessDoc);
+                }
+                function isFirstGuess(request, resource) {
+                    return resource.data[request.auth.uid] == null;
                 }
 
                 allow update: if isSignedIn() && isValidGuess(request.resource.data[request.auth.uid])
-                    && onlyChangedHimself(request, resource) && isDuringRound(request);
+                    && onlyChangedHimself(request, resource) && isDuringRound() && isFirstGuess(request, resource);
             }
 
             match /lyrics/{lyricsDoc} {

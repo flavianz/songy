@@ -1,9 +1,12 @@
 import { useEffect, useState } from "react";
-import { doc, getDoc, onSnapshot, updateDoc } from "firebase/firestore";
+import { doc, getDoc, onSnapshot } from "firebase/firestore";
 import { useParams } from "react-router-dom";
 import { Game } from "../../firebase/types.ts";
 import { firestore } from "../../firebase/firebase.ts";
 import { getUser } from "../../context/AuthContext.tsx";
+import PlayerList from "./PlayerList.tsx";
+import LyricsOverview from "./LyricsOverview.tsx";
+import Countdown from "./Countdown.tsx";
 
 export default function GameScreen() {
     let user = getUser()!;
@@ -13,13 +16,7 @@ export default function GameScreen() {
     const [lyrics, setLyrics] = useState<string | null>(null);
     const [loading, setLoading] = useState<boolean>(true);
     const [error, setError] = useState("");
-    const [countdown, setCountdown] = useState(3);
-    const [input, setInput] = useState<Input>({
-        album: "",
-        author: "",
-        release: 0,
-        title: "",
-    });
+    const [roundCountdown, setRoundCountdown] = useState(false);
     const [hasSubmitted, setHasSubmitted] = useState(false);
 
     useEffect(() => {
@@ -39,16 +36,13 @@ export default function GameScreen() {
                     setError("Not in game");
                 }
                 if (
-                    data.players[user.auth.uid].last_guess_round ==
+                    data.players[user.auth.uid].last_guess_round ===
                     data.curr_round
                 ) {
                     setHasSubmitted(true);
                 }
-                if (data.round_start < Date.now()) {
-                    setCountdown(0);
-                }
-                setCountdown(Math.ceil(data.round_start - Date.now()));
                 setGame(data);
+                setRoundCountdown(data.round_start > Date.now());
                 setLoading(false);
             },
             (e) => {
@@ -76,40 +70,12 @@ export default function GameScreen() {
         setLyrics(lyrics.data()?.lyrics);
     }
 
-    function updateCount() {
-        if (!game || loading) {
-            return;
-        }
-        if (game.round_start < Date.now()) {
-            setCountdown(0);
-        }
-        setCountdown(Math.ceil(game.round_start - Date.now()));
-    }
-
     useEffect(() => {
         if (!game) {
             return;
         }
         setTimeout(fetchLyrics, Math.max(game.round_start - Date.now(), 0));
-        const interval = setInterval(updateCount, 1000);
-
-        return () => {
-            clearInterval(interval);
-        };
     }, [game?.curr_round]);
-
-    async function handleSubmit() {
-        if (!game) {
-            setError("failed to submit guesses; invalid game");
-            return;
-        }
-        await updateDoc(
-            doc(firestore, "/games/" + uuid + "/guesses/" + game.curr_round),
-            {
-                [user.auth.uid]: input,
-            },
-        );
-    }
 
     if (typeof uuid !== "string") {
         return <div>no uuid</div>;
@@ -127,8 +93,20 @@ export default function GameScreen() {
         return <div>{error}</div>;
     }
 
-    if (countdown > 0) {
-        return <div>countdown: {countdown}</div>;
+    if (roundCountdown) {
+        return (
+            <div>
+                round starts in:{" "}
+                {
+                    <Countdown
+                        start={Math.ceil(
+                            (game.round_start - Date.now()) / 1000,
+                        )}
+                        onComplete={() => setRoundCountdown(false)}
+                    />
+                }
+            </div>
+        );
     }
 
     if (hasSubmitted) {
@@ -141,91 +119,11 @@ export default function GameScreen() {
     }
 
     return (
-        <div>
-            <p>Round No. {game.curr_round + 1}</p>
-            <PlayerList game={game} />
-            <div>
-                <pre>
-                    <p>{lyrics}</p>
-                </pre>
-            </div>
-            <div>
-                <label>
-                    Title:{" "}
-                    <input
-                        type="text"
-                        value={input.title}
-                        onChange={(e) =>
-                            setInput({ ...input, title: e.target.value })
-                        }
-                    />
-                </label>
-                <label>
-                    Author:{" "}
-                    <input
-                        type="text"
-                        value={input.author}
-                        onChange={(e) =>
-                            setInput({ ...input, author: e.target.value })
-                        }
-                    />
-                </label>
-                <label>
-                    Album:{" "}
-                    <input
-                        type="text"
-                        value={input.album}
-                        onChange={(e) =>
-                            setInput({ ...input, album: e.target.value })
-                        }
-                    />
-                </label>
-                <label>
-                    Release Year:{" "}
-                    <input
-                        type="number"
-                        value={input.release === 0 ? "" : input.release}
-                        onChange={(e) =>
-                            setInput({
-                                ...input,
-                                release: parseInt(e.currentTarget.value),
-                            })
-                        }
-                    />
-                </label>
-                <button onClick={handleSubmit}>Submit Answers</button>
-            </div>
-        </div>
-    );
-}
-
-interface Input {
-    title: string;
-    author: string;
-    album: string;
-    release: number;
-}
-
-function PlayerList({ game }: { game: Game }) {
-    return (
-        <div>
-            <p>Players:</p>
-            {Object.keys(game.players).map((uid, key) => {
-                const player = game.players[uid];
-                return (
-                    <div style={{ background: "#" + player.color }} key={key}>
-                        <p>
-                            {player.username} [{player.points}]
-                        </p>
-                        <p>{player.points}</p>
-                        <p>
-                            {player.last_guess_round === game.curr_round
-                                ? "has guesses"
-                                : ""}
-                        </p>
-                    </div>
-                );
-            })}
-        </div>
+        <LyricsOverview
+            game={game}
+            lyrics={lyrics!}
+            uuid={uuid}
+            setError={setError}
+        />
     );
 }

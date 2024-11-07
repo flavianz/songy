@@ -1,5 +1,5 @@
 import { onCall } from "firebase-functions/v2/https";
-import functions = require("firebase-functions");
+import { onDocumentUpdated } from "firebase-functions/v2/firestore";
 import { getFirestore, FieldValue } from "firebase-admin/firestore";
 import { initializeApp } from "firebase-admin/app";
 import { Answers, Game, GamePlayer, Guesses, Lobby } from "./types";
@@ -92,20 +92,27 @@ exports.startGame = onCall(async (request) => {
     return OK({ uuid: uuid });
 });
 
-// using 1st gen api because 2nd gen is not working with auth context
-// (not detecting the firestore multi-region database)
-exports.submitGuess = functions
-    .region("europe-west1")
-    .firestore.document("/games/{gameDoc}/guesses/{roundDoc}")
-    .onUpdate(async (event, context) => {
-        // user ensured to be logged in
-        if (!context.auth) {
-            console.error("guess doc updated without auth context");
+exports.submitGuess = onDocumentUpdated(
+    "/games/{gameDoc}/guesses/{roundDoc}",
+    async (event) => {
+        if (!event.data) {
+            console.error("updated guess with no data");
             return;
         }
-        const authId = context.auth.uid;
 
-        let after = event.after.data() as Guesses;
+        let authId = "";
+        for (let uid of Object.keys(event.data.before.data())) {
+            if (
+                event.data.before.data()[uid] === null &&
+                event.data.after.data()[uid] !== null
+            ) {
+                authId = uid;
+            }
+        }
+
+        console.log("auth", authId);
+
+        let after = event.data.after.data() as Guesses;
 
         let solution = after.solution;
         let my_guess = after[authId as string] as Answers;
@@ -121,25 +128,26 @@ exports.submitGuess = functions
             round_points += 10;
         }
 
-        round_points = Math.max(
+        round_points += Math.max(
             10 - Math.abs(solution.release - my_guess.release),
             0,
         ); // possibly implement another way of calculating points
 
         let batch = firestore.batch();
 
-        batch.update(firestore.doc("/games/" + context.params.gameDoc), {
-            [("players." + authId) as string]: {
-                points: FieldValue.increment(round_points),
-                last_guess_round: context.params.gameDoc,
-            },
+        batch.update(firestore.doc("/games/" + event.params.gameDoc), {
+            [(("players." + authId) as string) + ".points"]:
+                FieldValue.increment(round_points),
+            [(("players." + authId) as string) + ".last_guess_round"]: parseInt(
+                event.params.roundDoc,
+            ),
         });
 
         const round_length = 1.5 * 60 * 1000;
 
         if (!Object.values(after).includes(null)) {
             // all have guessed
-            batch.update(firestore.doc("/games/" + context.params.gameDoc), {
+            batch.update(firestore.doc("/games/" + event.params.gameDoc), {
                 curr_round: FieldValue.increment(1),
                 round_start: Date.now() + 8300,
                 max_round_end: Date.now() + round_length + 8300,
@@ -147,4 +155,5 @@ exports.submitGuess = functions
         }
 
         await batch.commit();
-    });
+    },
+);

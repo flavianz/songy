@@ -49,3 +49,10 @@ export interface RoundSolution {
     album: string;
     release: number;
 }
+export interface Answers {
+    author: string;
+    title: string;
+    album: string;
+    release: number;
+}
+export type Guess = Answers;
