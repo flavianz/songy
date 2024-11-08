@@ -36,15 +36,28 @@ service cloud.firestore {
                 function onlyChangedHimself(request, resource) {
                     return request.resource.data.diff(resource.data).changedKeys().hasOnly([request.auth.uid]);
                 }
-                function isDuringRound() {
-                    return get(/databases/$(database)/documents/games/$(gamesDoc)).data.curr_round == int(guessDoc);
+                function isDuringRound(request, gameDoc) {
+                    return gameDoc.data.curr_round == int(guessDoc) && gameDoc.data.max_round_end > request.time.toMillis();
                 }
                 function isFirstGuess(request, resource) {
                     return resource.data[request.auth.uid] == null;
                 }
 
+                function isPlayerInGame(request, resource) {
+                    return request.auth.uid in resource.data.keys();
+                }
+
                 allow update: if isSignedIn() && isValidGuess(request.resource.data[request.auth.uid])
-                    && onlyChangedHimself(request, resource) && isDuringRound() && isFirstGuess(request, resource);
+                    && onlyChangedHimself(request, resource) && isDuringRound(request, get(/databases/$(database)/documents/games/$(gamesDoc)))
+                    && isFirstGuess(request, resource) && isPlayerInGame(request, resource);
+
+                function isAfterRound(resource, gameDoc) {
+                    return int(guessDoc) == gameDoc.data.curr_round ?
+                            (request.time.toMillis() >= gameDoc.data.max_round_end || !(null in resource.data.values())) :
+                            int(guessDoc) < gameDoc.data.curr_round;
+                }
+
+                allow get: if isSignedIn() && isAfterRound(resource, get(/databases/$(database)/documents/games/$(gamesDoc))) && isPlayerInGame(request, resource);
             }
 
             match /lyrics/{lyricsDoc} {

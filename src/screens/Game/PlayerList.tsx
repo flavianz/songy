@@ -1,4 +1,5 @@
 import { Game } from "../../firebase/types.ts";
+import { wc_hex_is_light } from "../../firebase/functions/utils.ts";
 
 export default function PlayerList({ game }: { game: Game }) {
     return (
@@ -6,10 +7,15 @@ export default function PlayerList({ game }: { game: Game }) {
             <p>Players:</p>
             {Object.keys(game.players).map((uid, key) => {
                 const player = game.players[uid];
-                console.log(player);
                 return (
                     <div style={{ background: "#" + player.color }} key={key}>
-                        <p>
+                        <p
+                            style={{
+                                color: wc_hex_is_light(player.color)
+                                    ? "#000000"
+                                    : "#FFFFFF",
+                            }}
+                        >
                             {player.username} [{player.points}]{" "}
                             {player.last_guess_round === game.curr_round
                                 ? "has guesses"

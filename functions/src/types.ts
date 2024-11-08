@@ -35,6 +35,7 @@ export interface Game {
     total_rounds: number;
     curr_round: number;
     max_round_end: number;
+    host: string;
 }
 
 export interface Answers {

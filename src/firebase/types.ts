@@ -36,6 +36,7 @@ export interface Game {
     total_rounds: number;
     curr_round: number;
     max_round_end: number;
+    host: string;
 }
 export interface Round {
     lyrics: string;
@@ -56,3 +57,15 @@ export interface Answers {
     release: number;
 }
 export type Guess = Answers;
+
+export type GameState =
+    | "countdown"
+    | "guessing"
+    | "submitted"
+    | "overview"
+    | "finished";
+
+export interface Guesses {
+    solution: Guess;
+    [uid: string]: Guess | null;
+}

@@ -1,12 +1,15 @@
 import { useEffect, useState } from "react";
 import { doc, getDoc, onSnapshot } from "firebase/firestore";
 import { useParams } from "react-router-dom";
-import { Game } from "../../firebase/types.ts";
-import { firestore } from "../../firebase/firebase.ts";
+import { Game, GameState } from "../../firebase/types.ts";
+import { firestore, functions } from "../../firebase/firebase.ts";
 import { getUser } from "../../context/AuthContext.tsx";
 import PlayerList from "./PlayerList.tsx";
 import LyricsOverview from "./LyricsOverview.tsx";
 import Countdown from "./Countdown.tsx";
+import PointOverview from "./PointOverview.tsx";
+import { httpsCallable } from "firebase/functions";
+import EndOverview from "./EndOverview.tsx";
 
 export default function GameScreen() {
     let user = getUser()!;
@@ -16,8 +19,7 @@ export default function GameScreen() {
     const [lyrics, setLyrics] = useState<string | null>(null);
     const [loading, setLoading] = useState<boolean>(true);
     const [error, setError] = useState("");
-    const [roundCountdown, setRoundCountdown] = useState(false);
-    const [hasSubmitted, setHasSubmitted] = useState(false);
+    const [gameState, setGameState] = useState<GameState>("countdown");
 
     useEffect(() => {
         console.log("subscribed game");
@@ -39,10 +41,28 @@ export default function GameScreen() {
                     data.players[user.auth.uid].last_guess_round ===
                     data.curr_round
                 ) {
-                    setHasSubmitted(true);
+                    let allPlayersSubmitted = Object.values(data.players)
+                        .map(
+                            (player) =>
+                                player.last_guess_round === data.curr_round,
+                        )
+                        .reduce((previousValue, currentValue) => {
+                            {
+                                return previousValue && currentValue;
+                            }
+                        }, true);
+                    if (allPlayersSubmitted) {
+                        if (data.curr_round + 1 == data.total_rounds) {
+                            setGameState("finished");
+                        } else {
+                            setGameState("overview");
+                        }
+                    } else {
+                        setGameState("submitted");
+                    }
                 }
+                console.log("game:", data);
                 setGame(data);
-                setRoundCountdown(data.round_start > Date.now());
                 setLoading(false);
             },
             (e) => {
@@ -70,6 +90,15 @@ export default function GameScreen() {
         setLyrics(lyrics.data()?.lyrics);
     }
 
+    async function nextRound() {
+        const nextRound = httpsCallable(functions, "nextRound");
+        await nextRound({
+            uuid: uuid,
+        });
+        setGameState("guessing");
+        console.log("completed submit");
+    }
+
     useEffect(() => {
         if (!game) {
             return;
@@ -93,7 +122,7 @@ export default function GameScreen() {
         return <div>{error}</div>;
     }
 
-    if (roundCountdown) {
+    if (gameState === "countdown") {
         return (
             <div>
                 round starts in:{" "}
@@ -102,17 +131,53 @@ export default function GameScreen() {
                         start={Math.ceil(
                             (game.round_start - Date.now()) / 1000,
                         )}
-                        onComplete={() => setRoundCountdown(false)}
+                        onComplete={() => setGameState("guessing")}
                     />
                 }
             </div>
         );
     }
 
-    if (hasSubmitted) {
+    if (gameState === "overview") {
+        return (
+            <div>
+                <PointOverview game={game} uuid={uuid} />
+                {game.curr_round + 1 < game.total_rounds ? (
+                    game.host === user.auth.uid ? (
+                        <button onClick={nextRound}>Continue</button>
+                    ) : (
+                        <p>waiting for host to continue</p>
+                    )
+                ) : (
+                    <button onClick={() => setGameState("finished")}>
+                        Finish Game
+                    </button>
+                )}
+            </div>
+        );
+    }
+
+    if (gameState === "finished") {
+        return (
+            <div>
+                <EndOverview game={game} />
+            </div>
+        );
+    }
+
+    if (gameState === "submitted") {
         return (
             <div>
                 <p>Waiting for other players....</p>
+                <p>
+                    round ends in:{" "}
+                    <Countdown
+                        start={Math.ceil(
+                            (game.max_round_end - Date.now()) / 1000,
+                        )}
+                        onComplete={() => setGameState("overview")}
+                    />
+                </p>
                 <PlayerList game={game} />
             </div>
         );

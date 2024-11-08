@@ -53,6 +53,7 @@ exports.startGame = onCall(async (request) => {
         round_start: Date.now() + 3300, // 3 seconds until start, 300 ms latency puffer
         curr_round: 0,
         max_round_end: Date.now() + round_length + 3300,
+        host: lobby.host,
     } as Game);
 
     batch.update(firestore.doc("/lobbies/" + code), {
@@ -128,32 +129,59 @@ exports.submitGuess = onDocumentUpdated(
             round_points += 10;
         }
 
-        round_points += Math.max(
-            10 - Math.abs(solution.release - my_guess.release),
-            0,
-        ); // possibly implement another way of calculating points
+        round_points += Math.floor(
+            100 / (Math.abs(solution.release - my_guess.release) + 10),
+        );
 
-        let batch = firestore.batch();
-
-        batch.update(firestore.doc("/games/" + event.params.gameDoc), {
+        await firestore.doc("/games/" + event.params.gameDoc).update({
             [(("players." + authId) as string) + ".points"]:
                 FieldValue.increment(round_points),
             [(("players." + authId) as string) + ".last_guess_round"]: parseInt(
                 event.params.roundDoc,
             ),
         });
-
-        const round_length = 1.5 * 60 * 1000;
-
-        if (!Object.values(after).includes(null)) {
-            // all have guessed
-            batch.update(firestore.doc("/games/" + event.params.gameDoc), {
-                curr_round: FieldValue.increment(1),
-                round_start: Date.now() + 8300,
-                max_round_end: Date.now() + round_length + 8300,
-            });
-        }
-
-        await batch.commit();
     },
 );
+
+// potential elimination of function for direct change of the document
+exports.nextRound = onCall(async (request) => {
+    if (!request.auth) {
+        return UNAUTHORIZED;
+    }
+    if (typeof request.data.uuid !== "string") {
+        return BAD_REQUEST;
+    }
+    const uuid = request.data.uuid as string;
+
+    const game_doc = await firestore.doc("/games/" + uuid).get();
+    if (!game_doc.exists) {
+        return BAD_REQUEST;
+    }
+    const game = game_doc.data() as Game;
+
+    if (game.host !== request.auth.uid) {
+        return FORBIDDEN;
+    }
+
+    let allPlayersSubmitted = Object.values(game.players)
+        .map((player) => player.last_guess_round === game.curr_round)
+        .reduce((previousValue, currentValue) => {
+            {
+                return previousValue && currentValue;
+            }
+        }, true);
+    if (!allPlayersSubmitted && !(game.max_round_end < Date.now())) {
+        return FORBIDDEN;
+    }
+    if (game.curr_round + 1 == game.total_rounds) {
+        return FORBIDDEN;
+    }
+    const round_length = 1.5 * 60 * 1000;
+    await firestore.doc("/games/" + uuid).update({
+        curr_round: FieldValue.increment(1),
+        max_round_end: Date.now() + round_length + 3300,
+        round_start: Date.now() + 3300,
+    });
+
+    return OK();
+});
