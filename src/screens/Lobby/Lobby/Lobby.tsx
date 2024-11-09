@@ -6,11 +6,12 @@ import { firestore, functions } from "../../../firebase/firebase.ts";
 import { wc_hex_is_light } from "../../../firebase/functions/utils.ts";
 import { getUser } from "../../../context/AuthContext.tsx";
 import { httpsCallable } from "firebase/functions";
+import { debug } from "../../../main.tsx";
 
 export default function Lobby() {
     const user = getUser()!;
     let { lobbyCode } = useParams();
-
+    console.log(user);
     const navigate = useNavigate();
 
     if (!lobbyCode) {
@@ -22,11 +23,11 @@ export default function Lobby() {
     const [error, setError] = useState("");
 
     useEffect(() => {
-        console.log("subscribed lobby");
+        debug("subscribed lobby");
         const unsub = onSnapshot(
             doc(firestore, "lobbies", lobbyCode),
             (doc) => {
-                console.log("fetched lobby");
+                debug("fetched lobby");
                 if (!doc.exists()) {
                     unsub();
                     setError("Lobby does not exist");
@@ -45,7 +46,7 @@ export default function Lobby() {
         );
 
         return () => {
-            console.log("unsub lobby");
+            debug("unsub lobby");
             unsub();
         };
     }, []);

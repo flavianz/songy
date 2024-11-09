@@ -1,7 +1,7 @@
 import React, { useContext } from "react";
-import { FirestoreUser } from "../firebase/types.ts";
+import { Profile } from "../firebase/types.ts";
 
-export const AuthContext = React.createContext<FirestoreUser | null>(null);
+export const AuthContext = React.createContext<Profile | null>(null);
 
 export function getUser() {
     return useContext(AuthContext);

@@ -4,6 +4,9 @@ export interface FirestoreUser {
     username: string;
     level: number;
     lobby: string;
+}
+
+export interface Profile extends FirestoreUser {
     auth: User;
 }
 

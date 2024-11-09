@@ -2,7 +2,9 @@ import { ReactElement, ReactNode, useEffect, useState } from "react";
 import { AuthContext } from "../context/AuthContext";
 import { auth, firestore } from "../firebase/firebase.ts";
 import { FirestoreUser } from "../firebase/types.ts";
-import { doc, onSnapshot, Unsubscribe } from "firebase/firestore";
+import { doc, onSnapshot } from "firebase/firestore";
+import { User } from "firebase/auth";
+import { debug } from "../main.tsx";
 
 export function AuthProvider({
     children,
@@ -11,57 +13,58 @@ export function AuthProvider({
     children: any;
     loadingComponent: ReactElement;
 }): ReactNode {
-    const [user, setUser] = useState<FirestoreUser | null>(null);
+    const [firestoreUser, setFirestoreUser] = useState<FirestoreUser | null>(
+        null,
+    );
+    const [authUser, setAuthUser] = useState<User | null | undefined>(
+        undefined,
+    );
     const [loading, setLoading] = useState(true);
-
-    let unsubscribe: Unsubscribe;
 
     useEffect(() => {
         return auth.onAuthStateChanged((firebaseUser) => {
-            console.log("auth state changed", firebaseUser);
-            if (firebaseUser) {
-                if (unsubscribe !== undefined) {
-                    unsubscribe();
-                }
-                console.info("resubscribe");
-                console.log(firebaseUser);
-                try {
-                    unsubscribe = onSnapshot(
-                        doc(firestore, "users", firebaseUser.uid),
-                        async (doc) => {
-                            console.info("fetch user: ", doc.data());
-                            if (!doc.exists()) {
-                                console.log("signing out");
-                                await auth.signOut();
-                                return;
-                            }
-                            setUser({
-                                ...(doc.data() as FirestoreUser),
-                                auth: firebaseUser,
-                            });
-                            setLoading(false);
-                        },
-                        (e) => {
-                            console.log("error in user fetching", e.customData);
-                            console.error(e);
-                        },
-                    );
-                } catch (e) {
-                    console.log("error catch user auth");
-                    console.error(e);
-                }
-            } else {
-                if (unsubscribe !== undefined) {
-                    unsubscribe();
-                }
-                setUser(null);
-                setLoading(false);
-            }
+            debug("auth state changed");
+            setAuthUser(firebaseUser);
         });
     }, []);
 
+    useEffect(() => {
+        if (authUser === undefined) {
+            return;
+        }
+        if (!authUser) {
+            setFirestoreUser(null);
+            setLoading(false);
+            return;
+        }
+
+        let unsubscribe = onSnapshot(
+            doc(firestore, "/users/" + authUser.uid),
+            async (doc) => {
+                if (!doc.exists()) {
+                    await auth.signOut();
+                    return;
+                }
+                setFirestoreUser(doc.data() as FirestoreUser);
+                setLoading(false);
+            },
+            (e) => {
+                debug("error in user fetching", e.customData);
+                console.error(e);
+            },
+        );
+
+        return () => unsubscribe();
+    }, [authUser]);
+
     return (
-        <AuthContext.Provider value={user}>
+        <AuthContext.Provider
+            value={
+                !authUser || !firestoreUser
+                    ? null
+                    : { ...firestoreUser, auth: authUser }
+            }
+        >
             {loading ? loadingComponent : children}
         </AuthContext.Provider>
     );

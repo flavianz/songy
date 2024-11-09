@@ -1,10 +1,9 @@
 import { signOut } from "../../firebase/auth.ts";
 import { sendEmailVerification } from "firebase/auth";
 import { BASE_URL } from "../../main.tsx";
-import { getUser } from "../../context/AuthContext.tsx";
+import { auth } from "../../firebase/firebase.ts";
 
 export default function CheckInbox() {
-    let user = getUser()!;
     return (
         <div>
             <p>
@@ -14,7 +13,7 @@ export default function CheckInbox() {
             <button onClick={() => signOut()}>Sign out</button>
             <button
                 onClick={() =>
-                    sendEmailVerification(user.auth, {
+                    sendEmailVerification(auth.currentUser!, {
                         url: BASE_URL + "email_verified",
                     })
                 }

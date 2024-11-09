@@ -95,3 +95,10 @@ createRoot(document.getElementById("root")!).render(
         </AuthProvider>
     </StrictMode>,
 );
+
+export const DEBUG = import.meta.env.VITE_DEBUG == "true";
+export function debug(message?: any, ...optionalParams: any[]) {
+    if (DEBUG) {
+        console.log("[DEBUG] ", message, optionalParams);
+    }
+}
