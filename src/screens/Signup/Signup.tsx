@@ -38,6 +38,7 @@ export default function Signup() {
         } catch (error) {
             setError((error as Error).message);
         }
+        navigate("/check_inbox");
         setLoading(false);
     }
 
@@ -63,10 +64,8 @@ export default function Signup() {
             </form>
             <button
                 onClick={() =>
-                    signInWithGoogle().then((e) => {
-                        if (e.operationType == "link") {
-                            navigate("/email_verified");
-                        }
+                    signInWithGoogle().then(() => {
+                        navigate("/email_verified");
                     })
                 }
             />

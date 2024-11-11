@@ -22,8 +22,8 @@ export function AuthProvider({
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        return auth.onAuthStateChanged((firebaseUser) => {
-            debug("auth state changed");
+        return auth.onAuthStateChanged(async (firebaseUser) => {
+            debug("auth state changed", firebaseUser);
             setAuthUser(firebaseUser);
         });
     }, []);
@@ -32,14 +32,14 @@ export function AuthProvider({
         if (authUser === undefined) {
             return;
         }
-        if (!authUser) {
+        if (!authUser || !authUser?.emailVerified) {
             setFirestoreUser(null);
             setLoading(false);
             return;
         }
 
         let unsubscribe = onSnapshot(
-            doc(firestore, "/users/" + authUser.uid),
+            doc(firestore, "/users/" + authUser.uid + "/"),
             async (doc) => {
                 if (!doc.exists()) {
                     await auth.signOut();
@@ -48,9 +48,12 @@ export function AuthProvider({
                 setFirestoreUser(doc.data() as FirestoreUser);
                 setLoading(false);
             },
-            (e) => {
-                debug("error in user fetching", e.customData);
+            async (e) => {
+                debug("error in user fetching");
                 console.error(e);
+                if (e.code === "permission-denied") {
+                    await auth.signOut();
+                }
             },
         );
 

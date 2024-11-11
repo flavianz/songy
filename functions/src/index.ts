@@ -4,9 +4,10 @@ import { getFirestore, FieldValue } from "firebase-admin/firestore";
 import { initializeApp } from "firebase-admin/app";
 import { Answers, Game, GamePlayer, Guesses, Lobby } from "./types";
 import { v4 as generateUUID } from "uuid";
-import { getRandomSong } from "./utils";
+import { getRandomCode, getRandomSong } from "./utils";
 import { BAD_REQUEST, FORBIDDEN, OK, UNAUTHORIZED } from "./responses";
 import { setGlobalOptions } from "firebase-functions/v2";
+import { user } from "firebase-functions/v1/auth";
 
 initializeApp();
 const firestore = getFirestore();
@@ -184,4 +185,16 @@ exports.nextRound = onCall(async (request) => {
     });
 
     return OK();
+});
+exports.onSignup = user().onCreate(async (user, context) => {
+    if (user.providerData.length === 0) {
+        console.log("User signed up anonymously");
+        return;
+    }
+    //create firestore user document
+    await firestore.doc("/users/" + user.uid).create({
+        username: "default_" + getRandomCode(8),
+        level: 0,
+        lobby: "",
+    });
 });

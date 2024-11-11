@@ -15,7 +15,7 @@ import Create from "./screens/Lobby/Create/Create.tsx";
 import GameScreen from "./screens/Game/GameScreen.tsx";
 import EnsureSignIn from "./provider/EnsureSignIn.tsx";
 
-export const BASE_URL = "http://localhost:5137";
+export const BASE_URL = "http://localhost:5173/";
 
 const browserRouter = createBrowserRouter([
     {
@@ -99,6 +99,6 @@ createRoot(document.getElementById("root")!).render(
 export const DEBUG = import.meta.env.VITE_DEBUG == "true";
 export function debug(message?: any, ...optionalParams: any[]) {
     if (DEBUG) {
-        console.log("[DEBUG] ", message, optionalParams);
+        console.log("[DEBUG]", message, optionalParams);
     }
 }

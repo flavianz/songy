@@ -20,7 +20,7 @@ export default function Create() {
 
     async function createLobby(e: FormEvent<HTMLFormElement>) {
         e.preventDefault();
-        let code = getRandomCode();
+        let code = getRandomCode(4).toUpperCase();
         const batch = writeBatch(firestore);
         batch.set(doc(firestore, "lobbies", code), {
             host: user.auth.uid,
