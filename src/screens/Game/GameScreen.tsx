@@ -61,6 +61,13 @@ export default function GameScreen() {
                         setGameState("submitted");
                     }
                 }
+                if (data.max_round_end < Date.now()) {
+                    if (data.curr_round + 1 == data.total_rounds) {
+                        setGameState("finished");
+                    } else {
+                        setGameState("overview");
+                    }
+                }
                 console.log("game:", data);
                 setGame(data);
                 setLoading(false);
@@ -150,7 +157,7 @@ export default function GameScreen() {
                     )
                 ) : (
                     <button onClick={() => setGameState("finished")}>
-                        Finish Game
+                        See ranking
                     </button>
                 )}
             </div>
@@ -158,11 +165,7 @@ export default function GameScreen() {
     }
 
     if (gameState === "finished") {
-        return (
-            <div>
-                <EndOverview game={game} />
-            </div>
-        );
+        return <EndOverview game={game} />;
     }
 
     if (gameState === "submitted") {
@@ -184,11 +187,17 @@ export default function GameScreen() {
     }
 
     return (
-        <LyricsOverview
-            game={game}
-            lyrics={lyrics!}
-            uuid={uuid}
-            setError={setError}
-        />
+        <>
+            <Countdown
+                start={Math.ceil((game.max_round_end - Date.now()) / 1000)}
+                onComplete={() => setGameState("overview")}
+            />
+            <LyricsOverview
+                game={game}
+                lyrics={lyrics!}
+                uuid={uuid}
+                setError={setError}
+            />
+        </>
     );
 }

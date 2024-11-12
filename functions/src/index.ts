@@ -7,12 +7,12 @@ import { v4 as generateUUID } from "uuid";
 import { getRandomCode, getRandomSong } from "./utils";
 import { BAD_REQUEST, FORBIDDEN, OK, UNAUTHORIZED } from "./responses";
 import { setGlobalOptions } from "firebase-functions/v2";
-import { user } from "firebase-functions/v1/auth";
+import functions = require("firebase-functions/v1");
 
 initializeApp();
 const firestore = getFirestore();
 
-setGlobalOptions({ region: "europe-west4" });
+setGlobalOptions({ region: "europe-west1" });
 
 exports.startGame = onCall(async (request) => {
     if (!request.auth) {
@@ -141,7 +141,6 @@ exports.submitGuess = onDocumentUpdated(
             ),
         });
         console.log("completed", Date.now() - start, "ms");
-        return OK();
     },
 );
 
@@ -188,15 +187,18 @@ exports.nextRound = onCall(async (request) => {
     return OK();
 });
 
-exports.onSignup = user().onCreate(async (user, context) => {
-    if (user.providerData.length === 0) {
-        console.log("User signed up anonymously");
-        return;
-    }
-    //create firestore user document
-    await firestore.doc("/users/" + user.uid).create({
-        username: "default_" + getRandomCode(8),
-        level: 0,
-        lobby: "",
+exports.onSignup = functions
+    .region("europe-west1")
+    .auth.user()
+    .onCreate(async (user) => {
+        if (user.providerData.length === 0) {
+            console.log("User signed up anonymously");
+            return;
+        }
+        //create firestore user document
+        await firestore.doc("/users/" + user.uid).create({
+            username: "default_" + getRandomCode(8),
+            level: 0,
+            lobby: "",
+        });
     });
-});

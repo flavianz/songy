@@ -43,7 +43,12 @@ export default function PointOverview({
                 if (guessId === "solution") {
                     return;
                 }
-                const guess = guesses[guessId]!;
+                const guess = guesses[guessId] ?? {
+                    title: "No guess",
+                    author: "No guess",
+                    release: 0,
+                    album: "No guess",
+                };
                 return (
                     <div key={key} style={{ display: "flex" }}>
                         <p>

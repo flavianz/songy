@@ -1,6 +1,12 @@
 import { useEffect, useState } from "react";
 import { FirestoreLobby } from "../../../firebase/types.ts";
-import { doc, onSnapshot, deleteField, writeBatch } from "firebase/firestore";
+import {
+    doc,
+    onSnapshot,
+    deleteField,
+    writeBatch,
+    updateDoc,
+} from "firebase/firestore";
 import { Navigate, useNavigate, useParams } from "react-router-dom";
 import { firestore, functions } from "../../../firebase/firebase.ts";
 import { wc_hex_is_light } from "../../../firebase/functions/utils.ts";
@@ -87,6 +93,34 @@ export default function Lobby() {
         }
     }
 
+    async function kickPlayer(uid: string) {
+        let result = confirm(
+            "Kick player " + lobbyData!.players[uid].username + "?",
+        );
+        if (!result) {
+            return;
+        }
+        let batch = writeBatch(firestore);
+        batch.update(doc(firestore, "/lobbies/" + lobbyCode), {
+            ["players." + uid]: deleteField(),
+        });
+        batch.update(doc(firestore, "/users/" + uid), {
+            lobby: "",
+        });
+        await batch.commit();
+    }
+    async function promotePlayer(uid: string) {
+        let result = confirm(
+            "Promote player " + lobbyData!.players[uid].username + "?",
+        );
+        if (!result) {
+            return;
+        }
+        await updateDoc(doc(firestore, "/lobbies/" + lobbyCode), {
+            host: uid,
+        });
+    }
+
     return (
         <div>
             <p>Max Players: {lobbyData!.max_players}</p>
@@ -105,6 +139,17 @@ export default function Lobby() {
                         >
                             {player.username} [{uid}]
                         </p>
+                        {lobbyData?.host === user.auth.uid &&
+                            uid !== user.auth.uid && (
+                                <>
+                                    <button onClick={() => kickPlayer(uid)}>
+                                        Kick Player
+                                    </button>
+                                    <button onClick={() => promotePlayer(uid)}>
+                                        Promote to host
+                                    </button>
+                                </>
+                            )}
                     </div>
                 );
             })}

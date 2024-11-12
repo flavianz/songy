@@ -20,5 +20,5 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const firestore = getFirestore();
-const functions = getFunctions(app, "europe-west4");
+const functions = getFunctions(app, "europe-west1");
 export { app, auth, firestore, functions };
