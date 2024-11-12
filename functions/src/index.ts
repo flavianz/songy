@@ -97,6 +97,7 @@ exports.startGame = onCall(async (request) => {
 exports.submitGuess = onDocumentUpdated(
     "/games/{gameDoc}/guesses/{roundDoc}",
     async (event) => {
+        let start = Date.now();
         if (!event.data) {
             console.error("updated guess with no data");
             return;
@@ -111,8 +112,6 @@ exports.submitGuess = onDocumentUpdated(
                 authId = uid;
             }
         }
-
-        console.log("auth", authId);
 
         let after = event.data.after.data() as Guesses;
 
@@ -141,6 +140,8 @@ exports.submitGuess = onDocumentUpdated(
                 event.params.roundDoc,
             ),
         });
+        console.log("completed", Date.now() - start, "ms");
+        return OK();
     },
 );
 
@@ -186,6 +187,7 @@ exports.nextRound = onCall(async (request) => {
 
     return OK();
 });
+
 exports.onSignup = user().onCreate(async (user, context) => {
     if (user.providerData.length === 0) {
         console.log("User signed up anonymously");

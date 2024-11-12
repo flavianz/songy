@@ -9,17 +9,25 @@ export default function EnsureSignIn({
     children: ReactNode;
     allowEmailUnverified?: boolean;
 }) {
-    const [loggedIn, setLoggedIn] = useState(true);
+    const [loading, setLoading] = useState(true);
+    const [loggedIn, setLoggedIn] = useState(false);
 
     useEffect(() => {
         auth.onAuthStateChanged((user) => {
+            setLoading(true);
             if (!user) {
                 setLoggedIn(false);
+                setLoading(false);
                 return;
             }
             setLoggedIn(user.emailVerified || allowEmailUnverified);
+            setLoading(false);
         });
     }, []);
+
+    if (loading) {
+        return <p>loading</p>;
+    }
 
     return loggedIn ? children : <Navigate to={"/signin"} />;
 }
