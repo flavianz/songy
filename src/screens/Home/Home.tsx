@@ -1,13 +1,14 @@
 import styles from "./Home.module.css";
 import { useNavigate } from "react-router-dom";
 import { getUser } from "../../context/AuthContext.tsx";
+import Header from "../../Components/Header/Header.tsx";
 
 export default function Home() {
     const navigate = useNavigate();
     const user = getUser();
     return (
         <div id={styles.container}>
-            <h1>Songy</h1>
+            <Header />
             <div id={styles.playContainer}>
                 <a href="/create" className={styles.playButton}>
                     <h3>Create Lobby</h3>
