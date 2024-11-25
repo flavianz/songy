@@ -9,10 +9,13 @@ import {
 } from "firebase/firestore";
 import { Navigate, useNavigate, useParams } from "react-router-dom";
 import { firestore, functions } from "../../../firebase/firebase.ts";
-import { wc_hex_is_light } from "../../../firebase/functions/utils.ts";
 import { getUser } from "../../../context/AuthContext.tsx";
 import { httpsCallable } from "firebase/functions";
 import { debug } from "../../../main.tsx";
+import styles from "./Lobby.module.css";
+import { LobbyPlayer } from "../../../../functions/src/types.ts";
+import ChevronsUpIcon from "../../../assets/icons/ChevronsUpIcon.tsx";
+import UserXIcon from "../../../assets/icons/UserXIcon.tsx";
 
 export default function Lobby() {
     const user = getUser()!;
@@ -120,9 +123,77 @@ export default function Lobby() {
             host: uid,
         });
     }
-
+    console.log(lobbyData);
     return (
-        <div>
+        <div id={styles.container}>
+            <div id={styles.header} className={"glassy"}>
+                <p id={styles.title}>
+                    {lobbyData?.players![lobbyData?.host!].username}'s lobby
+                </p>
+                <p id={styles.playerCount}>
+                    {Object.keys(lobbyData?.players!).length}/
+                    {lobbyData?.max_players}
+                </p>
+                <button
+                    id={styles.leaveButton}
+                    className={"glassy"}
+                    onClick={handleQuit}
+                >
+                    Leave
+                </button>
+            </div>
+            <div id={styles.players}>
+                {Object.entries(lobbyData!.players).map(
+                    (player: [string, LobbyPlayer], key) => {
+                        return (
+                            <div
+                                key={key}
+                                className={"glassy " + styles.playerContainer}
+                            >
+                                <div
+                                    style={{
+                                        background: "#" + player[1].color,
+                                    }}
+                                    className={styles.profileBubble}
+                                />
+                                <p className={styles.playerUsername}>
+                                    {player[1].username === user.username
+                                        ? "You"
+                                        : player[1].username}
+                                </p>
+                                {lobbyData?.host === user.auth.uid &&
+                                    player[0] !== user.auth.uid && (
+                                        <div id={styles.hostContainer}>
+                                            <button
+                                                onClick={() =>
+                                                    promotePlayer(player[0])
+                                                }
+                                                className={
+                                                    "glassy " +
+                                                    styles.hostActionButton
+                                                }
+                                            >
+                                                <ChevronsUpIcon />
+                                            </button>
+                                            <button
+                                                onClick={() =>
+                                                    kickPlayer(player[0])
+                                                }
+                                                className={
+                                                    "glassy " +
+                                                    styles.hostActionButton
+                                                }
+                                            >
+                                                <UserXIcon />
+                                            </button>
+                                        </div>
+                                    )}
+                            </div>
+                        );
+                    },
+                )}
+            </div>
+            {/*}
             <p>Max Players: {lobbyData!.max_players}</p>
             <p>Lobby Code: {lobbyCode}</p>
             <p>Players:</p>
@@ -158,6 +229,7 @@ export default function Lobby() {
             {lobbyData!.host === user.auth.uid && (
                 <button onClick={handleStartGame}>Start game</button>
             )}
+            {*/}
         </div>
     );
 }

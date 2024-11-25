@@ -1,0 +1,75 @@
+#container {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+}
+#leaveButton {
+    padding: 1.2vh 2vw;
+    color: var(--text);
+    font-weight: 500;
+    font-size: 1.2rem;
+}
+#leaveButton:hover {
+    cursor: pointer;
+}
+#header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px;
+    margin: 2vh 1vw;
+}
+#playerCount {
+    font-size: 1.8rem;
+    font-weight: 600;
+    flex: 1;
+}
+#playerCount:first-child > div { margin-right: auto; }
+
+#playerCount:last-child  > div { margin-left: auto; }
+#title {
+    font-size: 2rem;
+    font-weight: 700;
+    flex: 1;
+}
+#players {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 30px;
+    padding: 10vh 10vw;
+    flex: 1;
+    justify-content: center;
+    overflow-y: scroll;
+}
+.playerContainer {
+    width: 200px;
+    height: fit-content;
+    padding: 3vh 2vw;
+    display: flex;
+    align-items: center;
+    flex-direction: column;
+}
+.profileBubble {
+    height: 120px;
+    width: 120px;
+    border-radius: 50%;
+    margin-bottom: 3vh;
+}
+.playerUsername {
+    font-weight: 500;
+    font-size: 1.2rem;
+}
+#hostContainer {
+    display: none;
+    padding: 1vh 1vw;
+}
+.playerContainer:hover #hostContainer {
+    display: flex;
+}
+.hostActionButton {
+    margin: 0 0.5vw;
+    padding: 0.8vh 0.8vw;
+}
+.hostActionButton:hover {
+    cursor: pointer;
+}
