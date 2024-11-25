@@ -1,4 +1,4 @@
-export default function UserIcon({ id }: { id: string }) {
+export default function UserIcon(props: any) {
     return (
         <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -10,8 +10,7 @@ export default function UserIcon({ id }: { id: string }) {
             strokeWidth="2"
             strokeLinecap="round"
             strokeLinejoin="round"
-            id={id}
-            className={"icon"}
+            {...props}
         >
             <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
             <circle cx="12" cy="7" r="4"></circle>
