@@ -134,13 +134,22 @@ export default function Lobby() {
                     {Object.keys(lobbyData?.players!).length}/
                     {lobbyData?.max_players}
                 </p>
-                <button
-                    id={styles.leaveButton}
-                    className={"glassy"}
-                    onClick={handleQuit}
-                >
-                    Leave
-                </button>
+                <div>
+                    {lobbyData?.host === user.auth.uid && (
+                        <button
+                            className={"glassy " + styles.button}
+                            onClick={handleStartGame}
+                        >
+                            Start Game
+                        </button>
+                    )}
+                    <button
+                        className={"glassy " + styles.button}
+                        onClick={handleQuit}
+                    >
+                        Leave
+                    </button>
+                </div>
             </div>
             <div id={styles.players}>
                 {Object.entries(lobbyData!.players).map(

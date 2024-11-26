@@ -1,0 +1,18 @@
+#solutionContainer {
+    padding: 3vh 1vw;
+    margin: 1vw;
+}
+#answerContainer {
+    margin-bottom: 2vh;
+}
+.answerField {
+    flex: 1;
+}
+#tableHeader {
+    display: flex;
+    padding: 0 1vw;
+}
+.singleAnswerContainer {
+    padding: 1vh 1vw;
+    display: flex;
+}

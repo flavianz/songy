@@ -5,6 +5,8 @@ import { useNavigate } from "react-router-dom";
 import { FirestoreLobby } from "../../../firebase/types.ts";
 import { getRandomHex } from "../../../firebase/functions/utils.ts";
 import { getUser } from "../../../context/AuthContext.tsx";
+import styles from "./Join.module.css";
+import Header from "../../../Components/Header/Header.tsx";
 
 export default function Join() {
     const user = getUser()!;
@@ -49,21 +51,28 @@ export default function Join() {
     });
 
     return (
-        <div>
+        <div id={styles.container}>
+            <Header />
             <form
+                id={styles.form}
                 onSubmit={(e) => {
                     e.preventDefault();
                     handleSubmit(code);
                 }}
             >
+                <h1 id={styles.title}>Enter pin</h1>
                 <input
+                    id={styles.input}
+                    className={"glassy"}
                     type="text"
                     value={code}
                     onChange={(e) => {
                         setCode(e.target.value.toUpperCase());
                     }}
                 />
-                <button type="submit">Join Game</button>
+                <button className={"glassy"} id={styles.button} type="submit">
+                    Join Game
+                </button>
                 <p>{error}</p>
             </form>
         </div>

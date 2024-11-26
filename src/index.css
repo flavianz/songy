@@ -29,7 +29,7 @@ body {
   animation: gradient 15s ease infinite;
 }
 
-h1,h2,h3,h4,h5,p,a,button,div {
+h1,h2,h3,h4,h5,p,a,button,div, input {
   color: var(--text);
   margin: 0;
 }
@@ -58,12 +58,12 @@ a {
 
 @keyframes gradient {
   0% {
-    background-position: 0% 50%;
+    background-position: 0 50%;
   }
   50% {
     background-position: 100% 50%;
   }
   100% {
-    background-position: 0% 50%;
+    background-position: 0 50%;
   }
 }

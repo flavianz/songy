@@ -1,0 +1,35 @@
+#form {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    flex: 1;
+}
+#container {
+    display: flex;
+    height: 100vh;
+    flex-direction: column;
+}
+#input {
+    padding: 2vh 2vw;
+    margin-bottom: 10vh;
+    width: 30vw;
+    text-align: center;
+    font-size: 2rem;
+    font-weight: 500;
+}
+#input:focus {
+    outline: none;
+}
+#title {
+    text-align: center;
+    margin-bottom: 5vh;
+}
+#button {
+    padding: 2vh 4vw;
+    font-weight: 600;
+    font-size: 1em;
+}
+#button:hover {
+    cursor: pointer;
+}
