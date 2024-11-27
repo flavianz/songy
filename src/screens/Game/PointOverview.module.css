@@ -1,18 +1,36 @@
 #solutionContainer {
     padding: 3vh 1vw;
     margin: 1vw;
+    justify-self: flex-end;
 }
 #answerContainer {
     margin-bottom: 2vh;
 }
 .answerField {
     flex: 1;
+    font-size: 1.2rem;
 }
 #tableHeader {
     display: flex;
-    padding: 0 1vw;
+    padding: 0 1vw 1.5vh 1vw;
 }
 .singleAnswerContainer {
     padding: 1vh 1vw;
     display: flex;
+}
+#container {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+#lyricsContainer {
+    flex: 1;
+    padding: 5vh 10vw;
+    overflow-y: scroll;
+    column-count: 2;
+}
+#lyricsContainer p {
+    font-size: 1.2rem;
+    white-space: pre-line;
 }

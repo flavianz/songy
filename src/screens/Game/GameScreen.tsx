@@ -10,6 +10,7 @@ import Countdown from "./Countdown.tsx";
 import PointOverview from "./PointOverview.tsx";
 import { httpsCallable } from "firebase/functions";
 import EndOverview from "./EndOverview.tsx";
+import styles from "./GameScreen.module.css";
 
 export default function GameScreen() {
     let user = getUser()!;
@@ -147,20 +148,26 @@ export default function GameScreen() {
 
     if (gameState === "overview") {
         return (
-            <div>
-                <PointOverview game={game} uuid={uuid} />
-                {game.curr_round + 1 < game.total_rounds ? (
-                    game.host === user.auth.uid ? (
-                        <button onClick={nextRound}>Continue</button>
+            <Frame>
+                <div>
+                    <PointOverview
+                        game={game}
+                        uuid={uuid}
+                        lyricsPreload={lyrics}
+                    />
+                    {game.curr_round + 1 < game.total_rounds ? (
+                        game.host === user.auth.uid ? (
+                            <button onClick={nextRound}>Continue</button>
+                        ) : (
+                            <p>waiting for host to continue</p>
+                        )
                     ) : (
-                        <p>waiting for host to continue</p>
-                    )
-                ) : (
-                    <button onClick={() => setGameState("finished")}>
-                        See ranking
-                    </button>
-                )}
-            </div>
+                        <button onClick={() => setGameState("finished")}>
+                            See ranking
+                        </button>
+                    )}
+                </div>
+            </Frame>
         );
     }
 
@@ -182,6 +189,29 @@ export default function GameScreen() {
                     />
                 </p>
                 <PlayerList game={game} />
+            </div>
+        );
+    }
+
+    function Frame({ children }: { children: any }) {
+        let title = "";
+        switch (gameState) {
+            case "overview":
+                title = "Result";
+                break;
+            default:
+                title = "Default";
+                break;
+        }
+        return (
+            <div id={styles.container}>
+                <div className={"glassy"} id={styles.titleContainer}>
+                    <h1>
+                        Round {(game?.curr_round ?? 0) + 1}/{game?.total_rounds}
+                        : {title}
+                    </h1>
+                </div>
+                <div id={styles.contentContainer}>{children}</div>
             </div>
         );
     }

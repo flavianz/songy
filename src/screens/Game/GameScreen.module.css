@@ -1,0 +1,10 @@
+#titleContainer {
+    padding: 1vh 1vw;
+    margin: 2vh 1vw;
+}
+#container {
+    height: 100vh;
+}
+#contentContainer {
+    height: calc(100vh - 6vh - 1rem);
+}
