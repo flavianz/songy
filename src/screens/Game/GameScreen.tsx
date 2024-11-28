@@ -71,6 +71,7 @@ export default function GameScreen() {
                 }
                 console.log("game:", data);
                 setGame(data);
+                setGameState("guessing");
                 setLoading(false);
             },
             (e) => {
@@ -132,41 +133,49 @@ export default function GameScreen() {
 
     if (gameState === "countdown") {
         return (
-            <div>
-                round starts in:{" "}
-                {
-                    <Countdown
-                        start={Math.ceil(
-                            (game.round_start - Date.now()) / 1000,
-                        )}
-                        onComplete={() => setGameState("guessing")}
-                    />
-                }
-            </div>
+            <Frame title={"Get Ready"} topComponent={null}>
+                <div id={styles.countdownContainer}>
+                    <h2>Round starts in</h2>
+                    {
+                        <Countdown
+                            start={Math.ceil(
+                                (game.round_start - Date.now()) / 1000,
+                            )}
+                            onComplete={() => setGameState("guessing")}
+                        />
+                    }
+                </div>
+            </Frame>
         );
     }
 
     if (gameState === "overview") {
         return (
-            <Frame>
-                <div>
-                    <PointOverview
-                        game={game}
-                        uuid={uuid}
-                        lyricsPreload={lyrics}
-                    />
-                    {game.curr_round + 1 < game.total_rounds ? (
+            <Frame
+                title={"Result"}
+                topComponent={
+                    game.curr_round + 1 < game.total_rounds ? (
                         game.host === user.auth.uid ? (
-                            <button onClick={nextRound}>Continue</button>
+                            <button
+                                onClick={nextRound}
+                                className={"glassy button-small"}
+                            >
+                                Continue
+                            </button>
                         ) : (
-                            <p>waiting for host to continue</p>
+                            <p>Waiting for host to continue... </p>
                         )
                     ) : (
-                        <button onClick={() => setGameState("finished")}>
+                        <button
+                            onClick={() => setGameState("finished")}
+                            className={"button button-small"}
+                        >
                             See ranking
                         </button>
-                    )}
-                </div>
+                    )
+                }
+            >
+                <PointOverview game={game} uuid={uuid} lyricsPreload={lyrics} />
             </Frame>
         );
     }
@@ -193,16 +202,15 @@ export default function GameScreen() {
         );
     }
 
-    function Frame({ children }: { children: any }) {
-        let title = "";
-        switch (gameState) {
-            case "overview":
-                title = "Result";
-                break;
-            default:
-                title = "Default";
-                break;
-        }
+    function Frame({
+        children,
+        title,
+        topComponent,
+    }: {
+        children: any;
+        title: string;
+        topComponent: any;
+    }) {
         return (
             <div id={styles.container}>
                 <div className={"glassy"} id={styles.titleContainer}>
@@ -210,6 +218,7 @@ export default function GameScreen() {
                         Round {(game?.curr_round ?? 0) + 1}/{game?.total_rounds}
                         : {title}
                     </h1>
+                    {topComponent}
                 </div>
                 <div id={styles.contentContainer}>{children}</div>
             </div>
@@ -217,10 +226,12 @@ export default function GameScreen() {
     }
 
     return (
-        <>
+        <Frame title={"Take a guess"} topComponent={null}>
             <Countdown
-                start={Math.ceil((game.max_round_end - Date.now()) / 1000)}
-                onComplete={() => setGameState("overview")}
+                start={
+                    Math.ceil((game.max_round_end - Date.now()) / 1000) + 1000
+                }
+                onComplete={() => setGameState("guessing")}
             />
             <LyricsOverview
                 game={game}
@@ -228,6 +239,6 @@ export default function GameScreen() {
                 uuid={uuid}
                 setError={setError}
             />
-        </>
+        </Frame>
     );
 }

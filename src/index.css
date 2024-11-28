@@ -55,6 +55,12 @@ a {
   -webkit-backdrop-filter: blur(7px);
   border: 1px solid rgba(255, 255, 255, 0.3);
 }
+.button-small {
+  padding: 1vh 1vw;
+}
+.button-small:hover {
+  cursor: pointer;
+}
 
 @keyframes gradient {
   0% {

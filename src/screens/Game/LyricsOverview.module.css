@@ -1,0 +1,7 @@
+#lyrics {
+    white-space: pre-line;
+    column-count: 2;
+}
+#lyricsContainer {
+    padding: 0 10vw;
+}

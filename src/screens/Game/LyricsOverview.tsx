@@ -4,6 +4,7 @@ import PlayerList from "./PlayerList.tsx";
 import { doc, updateDoc } from "firebase/firestore";
 import { firestore } from "../../firebase/firebase.ts";
 import { getUser } from "../../context/AuthContext.tsx";
+import styles from "./LyricsOverview.module.css";
 
 export default function LyricsOverview({
     game,
@@ -39,12 +40,9 @@ export default function LyricsOverview({
 
     return (
         <div>
-            <p>Round No. {game.curr_round + 1}</p>
             <PlayerList game={game} />
-            <div>
-                <pre>
-                    <p>{lyrics}</p>
-                </pre>
+            <div id={styles.lyricsContainer}>
+                <p id={styles.lyrics}>{lyrics}</p>
             </div>
             <div>
                 <label>
