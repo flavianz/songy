@@ -23,7 +23,7 @@ export default function Countdown({
         return () => clearInterval(interval);
     }, []);
 
-    if (countdown <= 0) {
+    if (countdown < 0) {
         return null;
     }
 

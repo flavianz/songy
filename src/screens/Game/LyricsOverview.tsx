@@ -1,6 +1,5 @@
 import { Game, Guess } from "../../firebase/types.ts";
 import { useState } from "react";
-import PlayerList from "./PlayerList.tsx";
 import { doc, updateDoc } from "firebase/firestore";
 import { firestore } from "../../firebase/firebase.ts";
 import { getUser } from "../../context/AuthContext.tsx";
@@ -39,15 +38,15 @@ export default function LyricsOverview({
     }
 
     return (
-        <div>
-            <PlayerList game={game} />
+        <div id={styles.container}>
             <div id={styles.lyricsContainer}>
                 <p id={styles.lyrics}>{lyrics}</p>
             </div>
-            <div>
+            <div id={styles.inputContainer} className={"glassy"}>
                 <label>
                     Title:{" "}
                     <input
+                        className={"glassy " + styles.input}
                         type="text"
                         value={input.title}
                         onChange={(e) =>
@@ -55,20 +54,12 @@ export default function LyricsOverview({
                         }
                     />
                 </label>
-                <label>
-                    Author:{" "}
-                    <input
-                        type="text"
-                        value={input.author}
-                        onChange={(e) =>
-                            setInput({ ...input, author: e.target.value })
-                        }
-                    />
-                </label>
+
                 <label>
                     Album:{" "}
                     <input
                         type="text"
+                        className={"glassy " + styles.input}
                         value={input.album}
                         onChange={(e) =>
                             setInput({ ...input, album: e.target.value })
@@ -76,9 +67,21 @@ export default function LyricsOverview({
                     />
                 </label>
                 <label>
+                    Author:{" "}
+                    <input
+                        type="text"
+                        className={"glassy " + styles.input}
+                        value={input.author}
+                        onChange={(e) =>
+                            setInput({ ...input, author: e.target.value })
+                        }
+                    />
+                </label>
+                <label>
                     Release Year:{" "}
                     <input
                         type="number"
+                        className={"glassy " + styles.input}
                         value={input.release === 0 ? "" : input.release}
                         onChange={(e) =>
                             setInput({
@@ -88,7 +91,12 @@ export default function LyricsOverview({
                         }
                     />
                 </label>
-                <button onClick={handleSubmit}>Submit Answers</button>
+                <button
+                    onClick={handleSubmit}
+                    className={"glassy button-small"}
+                >
+                    Submit Answers
+                </button>
             </div>
         </div>
     );

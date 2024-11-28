@@ -202,43 +202,6 @@ export default function Lobby() {
                     },
                 )}
             </div>
-            {/*}
-            <p>Max Players: {lobbyData!.max_players}</p>
-            <p>Lobby Code: {lobbyCode}</p>
-            <p>Players:</p>
-            {Object.keys(lobbyData!.players).map((uid, key) => {
-                const player = lobbyData!.players[uid];
-                return (
-                    <div style={{ background: "#" + player.color }} key={key}>
-                        <p
-                            style={{
-                                color: wc_hex_is_light(player.color)
-                                    ? "#000000"
-                                    : "#FFFFFF",
-                            }}
-                        >
-                            {player.username} [{uid}]
-                        </p>
-                        {lobbyData?.host === user.auth.uid &&
-                            uid !== user.auth.uid && (
-                                <>
-                                    <button onClick={() => kickPlayer(uid)}>
-                                        Kick Player
-                                    </button>
-                                    <button onClick={() => promotePlayer(uid)}>
-                                        Promote to host
-                                    </button>
-                                </>
-                            )}
-                    </div>
-                );
-            })}
-            <p>{error}</p>
-            <button onClick={handleQuit}>Leave Lobby</button>
-            {lobbyData!.host === user.auth.uid && (
-                <button onClick={handleStartGame}>Start game</button>
-            )}
-            {*/}
         </div>
     );
 }

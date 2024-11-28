@@ -41,18 +41,6 @@ export interface Game {
     max_round_end: number;
     host: string;
 }
-export interface Round {
-    lyrics: string;
-    round_start: number;
-    round_end: number;
-}
-
-export interface RoundSolution {
-    author: string;
-    title: string;
-    album: string;
-    release: number;
-}
 export interface Answers {
     author: string;
     title: string;

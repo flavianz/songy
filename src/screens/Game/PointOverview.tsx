@@ -105,7 +105,8 @@ export default function PointOverview({
                                     style={{ flex: 2 }}
                                 >
                                     {guess.title}{" "}
-                                    {guess.title === guesses.solution.title &&
+                                    {guess.title.toLowerCase() ===
+                                        guesses.solution.title.toLowerCase() &&
                                         "(+10)"}
                                 </p>
                                 <p
@@ -113,7 +114,8 @@ export default function PointOverview({
                                     style={{ flex: 2 }}
                                 >
                                     {guess.album}{" "}
-                                    {guess.album === guesses.solution.album &&
+                                    {guess.album.toLowerCase() ===
+                                        guesses.solution.album.toLowerCase() &&
                                         "(+10)"}
                                 </p>
                                 <p
@@ -121,7 +123,8 @@ export default function PointOverview({
                                     style={{ flex: 2 }}
                                 >
                                     {guess.author}{" "}
-                                    {guess.author === guesses.solution.author &&
+                                    {guess.author.toLowerCase() ===
+                                        guesses.solution.author.toLowerCase() &&
                                         "(+10)"}
                                 </p>
                                 <p

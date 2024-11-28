@@ -71,7 +71,6 @@ export default function GameScreen() {
                 }
                 console.log("game:", data);
                 setGame(data);
-                setGameState("guessing");
                 setLoading(false);
             },
             (e) => {
@@ -100,11 +99,13 @@ export default function GameScreen() {
     }
 
     async function nextRound() {
+        let now = Date.now();
         const nextRound = httpsCallable(functions, "nextRound");
+        console.log(Date.now() - now);
         await nextRound({
             uuid: uuid,
         });
-        setGameState("guessing");
+        setGameState("countdown");
         console.log("completed submit");
     }
 
@@ -181,7 +182,11 @@ export default function GameScreen() {
     }
 
     if (gameState === "finished") {
-        return <EndOverview game={game} />;
+        return (
+            <Frame title={"Placements"} topComponent={null}>
+                <EndOverview game={game} />
+            </Frame>
+        );
     }
 
     if (gameState === "submitted") {
@@ -226,13 +231,20 @@ export default function GameScreen() {
     }
 
     return (
-        <Frame title={"Take a guess"} topComponent={null}>
-            <Countdown
-                start={
-                    Math.ceil((game.max_round_end - Date.now()) / 1000) + 1000
-                }
-                onComplete={() => setGameState("guessing")}
-            />
+        <Frame
+            title={"Take a guess"}
+            topComponent={
+                <div style={{ display: "flex" }}>
+                    <p style={{ marginRight: "1vw" }}>Time left:</p>
+                    <Countdown
+                        start={Math.ceil(
+                            (game.max_round_end - Date.now()) / 1000,
+                        )}
+                        onComplete={() => setGameState("overview")}
+                    />
+                </div>
+            }
+        >
             <LyricsOverview
                 game={game}
                 lyrics={lyrics!}
