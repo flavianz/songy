@@ -7,7 +7,12 @@ import {
     writeBatch,
     updateDoc,
 } from "firebase/firestore";
-import { Navigate, useNavigate, useParams } from "react-router-dom";
+import {
+    Navigate,
+    useNavigate,
+    useParams,
+    useSearchParams,
+} from "react-router-dom";
 import { firestore, functions } from "../../../firebase/firebase.ts";
 import { getUser } from "../../../context/AuthContext.tsx";
 import { httpsCallable } from "firebase/functions";
@@ -22,6 +27,7 @@ export default function Lobby() {
     let { lobbyCode } = useParams();
     console.log(user);
     const navigate = useNavigate();
+    const [searchParams] = useSearchParams();
 
     if (!lobbyCode) {
         return <Navigate to="/join" />;
@@ -35,18 +41,21 @@ export default function Lobby() {
         debug("subscribed lobby");
         const unsub = onSnapshot(
             doc(firestore, "lobbies", lobbyCode),
-            (doc) => {
+            (document) => {
                 debug("fetched lobby");
-                if (!doc.exists()) {
+                if (!document.exists()) {
                     unsub();
                     setError("Lobby does not exist");
                     return;
                 }
-                let data = doc.data() as FirestoreLobby;
+                let data = document.data() as FirestoreLobby;
                 if (!Object.keys(data.players).includes(user.auth.uid)) {
                     navigate("/join");
                 }
-                if (data.game !== "") {
+                if (
+                    data.game !== "" &&
+                    searchParams.get("ignore") !== data.game
+                ) {
                     navigate("/game/" + data.game);
                 }
                 setLobbyData(data);

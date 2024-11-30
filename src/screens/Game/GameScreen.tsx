@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
-import { doc, getDoc, onSnapshot } from "firebase/firestore";
-import { useParams } from "react-router-dom";
+import { doc, getDoc, onSnapshot, updateDoc } from "firebase/firestore";
+import { useNavigate, useParams } from "react-router-dom";
 import { Game, GameState } from "../../firebase/types.ts";
 import { firestore, functions } from "../../firebase/firebase.ts";
 import { getUser } from "../../context/AuthContext.tsx";
@@ -15,7 +15,7 @@ import styles from "./GameScreen.module.css";
 export default function GameScreen() {
     let user = getUser()!;
     const { uuid } = useParams();
-
+    const navigate = useNavigate();
     const [game, setGame] = useState<Game | null>(null);
     const [lyrics, setLyrics] = useState<string | null>(null);
     const [loading, setLoading] = useState<boolean>(true);
@@ -63,11 +63,7 @@ export default function GameScreen() {
                     }
                 }
                 if (data.max_round_end < Date.now()) {
-                    if (data.curr_round + 1 == data.total_rounds) {
-                        setGameState("finished");
-                    } else {
-                        setGameState("overview");
-                    }
+                    setGameState("overview");
                 }
                 console.log("game:", data);
                 setGame(data);
@@ -107,6 +103,17 @@ export default function GameScreen() {
         });
         setGameState("countdown");
         console.log("completed submit");
+    }
+
+    async function endGame() {
+        await updateDoc(doc(firestore, "lobbies", user.lobby), {
+            game: "",
+        });
+        returnToLobby();
+    }
+
+    function returnToLobby() {
+        navigate("/lobby/" + user.lobby + "?ignore=" + uuid);
     }
 
     useEffect(() => {
@@ -168,8 +175,10 @@ export default function GameScreen() {
                         )
                     ) : (
                         <button
-                            onClick={() => setGameState("finished")}
-                            className={"button button-small"}
+                            onClick={async () => {
+                                setGameState("finished");
+                            }}
+                            className={"glassy button-small"}
                         >
                             See ranking
                         </button>
@@ -183,7 +192,23 @@ export default function GameScreen() {
 
     if (gameState === "finished") {
         return (
-            <Frame title={"Placements"} topComponent={null}>
+            <Frame
+                title={"Placements"}
+                topComponent={
+                    <button
+                        onClick={
+                            game.host === user.auth.uid
+                                ? endGame
+                                : returnToLobby
+                        }
+                        className={"glassy button-small"}
+                    >
+                        {game.host === user.auth.uid
+                            ? "End Game"
+                            : "Return to lobby"}
+                    </button>
+                }
+            >
                 <EndOverview game={game} />
             </Frame>
         );

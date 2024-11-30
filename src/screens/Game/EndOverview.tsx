@@ -1,32 +1,18 @@
-import { Game } from "../../firebase/types.ts";
 import { getUser } from "../../context/AuthContext.tsx";
-import { doc, updateDoc } from "firebase/firestore";
-import { firestore } from "../../firebase/firebase.ts";
-import { useNavigate } from "react-router-dom";
 import styles from "./EndOverview.module.css";
+import { wc_hex_is_light } from "../../firebase/functions/utils.ts";
+import { Game } from "../../firebase/types.ts";
 
 export default function EndOverview({ game }: { game: Game }) {
-    const navigate = useNavigate();
     let user = getUser()!;
-    let results = [
-        { username: "first", id: "", points: 100, color: "ff7700" },
-        { username: "second", id: "", points: 80, color: "77ff00" },
-        { username: "third", id: "", points: 60, color: "0077ff" },
-        {
-            username: "fourth",
-            id: "",
-            points: 40,
-            color: "00ff77",
-        },
-        { username: "fifth", id: "", points: 20, color: "ff0077" },
-    ]; /*Object.entries(game.players).map((player) => {
+    let results = Object.entries(game.players).map((player) => {
         return {
             username: player[1].username,
             id: player[0],
             points: player[1].points,
             color: player[1].color,
         } as ResultPlayer;
-    });*/
+    });
 
     function comparePlayers(a: ResultPlayer, b: ResultPlayer) {
         if (a.points < b.points) {
@@ -39,17 +25,6 @@ export default function EndOverview({ game }: { game: Game }) {
     }
 
     results.sort(comparePlayers);
-
-    function returnToLobby() {
-        navigate("/lobby/" + user.lobby);
-    }
-
-    async function endGame() {
-        await updateDoc(doc(firestore, "/lobbies/" + user.lobby), {
-            game: "",
-        });
-        returnToLobby();
-    }
 
     function PodiumCard({
         player,
@@ -75,13 +50,22 @@ export default function EndOverview({ game }: { game: Game }) {
                     }}
                     className={styles.podiumBubble}
                 >
-                    <p>{rank == 0 ? "1st" : rank == 1 ? "2nd" : "3rd"}</p>
+                    <p
+                        style={{
+                            color: wc_hex_is_light(player.color)
+                                ? "unset"
+                                : "var(--background)",
+                        }}
+                    >
+                        {rank == 0 ? "1st" : rank == 1 ? "2nd" : "3rd"}
+                    </p>
                 </div>
                 <p className={styles.podiumUsername}>
                     {player.username === user.username
                         ? "You"
                         : player.username}
                 </p>
+                <p>Points: {player.points}</p>
             </div>
         );
     }
@@ -99,23 +83,35 @@ export default function EndOverview({ game }: { game: Game }) {
                     <PodiumCard player={results[2]} rank={2} />
                 )}
             </div>
-            {results.slice(3).map((player, key) => {
-                return (
-                    <div
-                        key={key}
-                        className={styles.rankingPlayerContainer + " glassy"}
-                    >
-                        <p>{key + 4}.</p>
-                        <p>{player.username}</p>
-                        <p>{player.points}</p>
-                    </div>
-                );
-            })}
-            {game.host === user.auth.uid ? (
-                <button onClick={endGame}>End game</button>
-            ) : (
-                <button onClick={returnToLobby}>Return to lobby</button>
-            )}
+            <div id={styles.rankingContainer}>
+                {results.slice(3).map((player, key) => {
+                    return (
+                        <div
+                            key={key}
+                            className={
+                                styles.rankingPlayerContainer + " glassy"
+                            }
+                        >
+                            <p
+                                className={styles.rankNumber}
+                                style={{
+                                    background: "#" + player.color,
+                                    color: wc_hex_is_light(player.color)
+                                        ? "unset"
+                                        : "var(--background)",
+                                }}
+                            >
+                                {key + 4}
+                            </p>
+                            <p>{player.username}</p>
+
+                            <p className={styles.rankingPoints}>
+                                Points: {player.points}
+                            </p>
+                        </div>
+                    );
+                })}
+            </div>
         </div>
     );
 }

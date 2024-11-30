@@ -15,6 +15,7 @@
 }
 #contentContainer {
     flex: 1;
+    overflow-y: auto;
 }
 #countdownContainer {
     height: 100%;

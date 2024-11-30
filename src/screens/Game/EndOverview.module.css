@@ -1,7 +1,5 @@
 #container {
-    height: 100%;
-    display: flex;
-    flex-direction: column;
+
 }
 #podiumContainer {
     height: 45vh;
@@ -48,4 +46,21 @@
 }
 .rankingPlayerContainer {
     display: flex;
+    margin: 1vh 1vw;
+    padding: 1vh 1vw;
+    font-size: 1.3rem;
+    justify-content: space-between;
+}
+.rankNumber {
+    border-radius: 50%;
+    height: 2rem;
+    width: 2rem;
+    place-content: center;
+    place-items: center;
+    text-align: center;
+    margin-right: 1vw;
+    font-weight: 700;
+}
+#rankingContainer {
+    overflow: visible;
 }
