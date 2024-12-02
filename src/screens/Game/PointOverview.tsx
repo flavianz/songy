@@ -144,14 +144,16 @@ export default function PointOverview({
                                 </p>
                                 <p className={styles.answerField}>
                                     +
-                                    {(guess.title === guesses.solution.title
+                                    {(guess.title.toLowerCase() ===
+                                    guesses.solution.title.toLowerCase()
                                         ? 10
                                         : 0) +
-                                        (guess.album === guesses.solution.album
+                                        (guess.album.toLowerCase() ===
+                                        guesses.solution.album.toLowerCase()
                                             ? 10
                                             : 0) +
-                                        (guess.author ===
-                                        guesses.solution.author
+                                        (guess.author.toLowerCase() ===
+                                        guesses.solution.author.toLowerCase()
                                             ? 10
                                             : 0) +
                                         Math.floor(
