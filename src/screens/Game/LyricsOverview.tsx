@@ -1,4 +1,4 @@
-import { Game, Guess } from "../../firebase/types.ts";
+import { Game, GameState, Guess } from "../../firebase/types.ts";
 import { useState } from "react";
 import { doc, updateDoc } from "firebase/firestore";
 import { firestore } from "../../firebase/firebase.ts";
@@ -9,11 +9,13 @@ export default function LyricsOverview({
     game,
     lyrics,
     setError,
+    setState,
     uuid,
 }: {
     game: Game;
     lyrics: string;
     setError: (msg: string) => void;
+    setState: (state: GameState) => void;
     uuid: string;
 }) {
     let user = getUser()!;
@@ -35,6 +37,7 @@ export default function LyricsOverview({
                 [user.auth.uid]: input,
             },
         );
+        setState("submitted");
     }
 
     return (

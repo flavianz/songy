@@ -274,6 +274,7 @@ export default function GameScreen() {
                 game={game}
                 lyrics={lyrics!}
                 uuid={uuid}
+                setState={setGameState}
                 setError={setError}
             />
         </Frame>
