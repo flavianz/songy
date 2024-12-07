@@ -69,13 +69,8 @@ export default function GameScreen() {
         if (!game) {
             return;
         }
-        console.log("timeout started");
         setTimeout(
-            async () => {
-                debug("Fetching Lyrics");
-                setLyrics(await game.fetchLyrics());
-                debug("Fetched Lyrics");
-            },
+            async () => setLyrics(await game.fetchLyrics()),
             Math.max(game.roundStart - Date.now(), 0),
         );
     }, [game?.currRound]);

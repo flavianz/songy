@@ -13,7 +13,7 @@ export default function Header() {
                 <UserIcon
                     className={styles.icon}
                     onClick={() => {
-                        navigate("/profile");
+                        navigate("/profile/me");
                     }}
                 />
             </div>

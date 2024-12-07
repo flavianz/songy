@@ -27,12 +27,8 @@ const browserRouter = createBrowserRouter([
         element: <SignIn />,
     },
     {
-        path: "/profile",
-        element: (
-            <EnsureSignIn>
-                <Profile />
-            </EnsureSignIn>
-        ),
+        path: "/profile/:uid",
+        element: <Profile />,
     },
     {
         path: "/signup",

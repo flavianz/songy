@@ -23,7 +23,7 @@ export function AuthProvider({
 
     useEffect(() => {
         return auth.onAuthStateChanged(async (firebaseUser) => {
-            debug("auth state changed" + firebaseUser);
+            console.debug("auth state changed", firebaseUser);
             setAuthUser(firebaseUser);
         });
     }, []);
