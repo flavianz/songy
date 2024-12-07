@@ -31,7 +31,7 @@ export interface GamePlayer {
     last_guess_round: number;
 }
 
-export interface Game {
+export interface GameType {
     players: {
         [uid: string]: GamePlayer;
     };
@@ -49,13 +49,13 @@ export interface Answers {
 }
 export type Guess = Answers;
 
-export type GameState =
-    | "countdown"
-    | "guessing"
-    | "submitted"
-    | "overview"
-    | "finished";
-
+export enum GameState {
+    COUNTDOWN,
+    GUESSING,
+    SUBMITTED,
+    OVERVIEW,
+    FINISHED,
+}
 export interface Guesses {
     solution: Guess;
     [uid: string]: Guess | null;

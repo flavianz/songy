@@ -15,7 +15,6 @@ export default function Countdown({
                     onComplete();
                     return countdown;
                 }
-                console.log("countdown", countdown);
                 return countdown - 1;
             });
         }, 1000);

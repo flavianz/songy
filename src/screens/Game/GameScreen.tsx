@@ -1,116 +1,61 @@
 import { useEffect, useState } from "react";
-import { doc, getDoc, onSnapshot, updateDoc } from "firebase/firestore";
+import { doc, onSnapshot } from "firebase/firestore";
 import { useNavigate, useParams } from "react-router-dom";
-import { Game, GameState } from "../../firebase/types.ts";
-import { firestore, functions } from "../../firebase/firebase.ts";
+import { firestore } from "../../firebase/firebase.ts";
 import { getUser } from "../../context/AuthContext.tsx";
 import PlayerList from "./PlayerList.tsx";
 import LyricsOverview from "./LyricsOverview.tsx";
 import Countdown from "./Countdown.tsx";
 import PointOverview from "./PointOverview.tsx";
-import { httpsCallable } from "firebase/functions";
 import EndOverview from "./EndOverview.tsx";
 import styles from "./GameScreen.module.css";
+import { GameState, GameType } from "../../types/types.ts";
+import { debug } from "../../main.tsx";
+import { Game } from "../../types/Game.ts";
 
 export default function GameScreen() {
     let user = getUser()!;
     const { uuid } = useParams();
     const navigate = useNavigate();
-    const [game, setGame] = useState<Game | null>(null);
+    const [game, setGame] = useState<Game | undefined>();
     const [lyrics, setLyrics] = useState<string | null>(null);
     const [loading, setLoading] = useState<boolean>(true);
     const [error, setError] = useState("");
-    const [gameState, setGameState] = useState<GameState>("countdown");
+    const [gameState, setGameState] = useState<GameState>(GameState.COUNTDOWN);
 
     useEffect(() => {
-        console.log("subscribed game");
+        debug("Subscribed to Game");
         const unsubGame = onSnapshot(
             doc(firestore, "/games/" + uuid),
             (doc) => {
-                console.log("refetched game");
+                debug("Refetched Game");
                 if (!doc.exists()) {
                     unsubGame();
                     setError("Lobby does not exist");
                     return;
                 }
-                let data = doc.data() as Game;
-                if (!Object.keys(data.players).includes(user.auth.uid)) {
+                let game = new Game(doc.data() as GameType, user, uuid!);
+
+                if (!game.isInGame()) {
                     unsubGame();
-                    setError("Not in game");
+                    setError("Game does not exist");
                 }
-                if (
-                    data.players[user.auth.uid].last_guess_round ===
-                    data.curr_round
-                ) {
-                    let allPlayersSubmitted = Object.values(data.players)
-                        .map(
-                            (player) =>
-                                player.last_guess_round === data.curr_round,
-                        )
-                        .reduce((previousValue, currentValue) => {
-                            {
-                                return previousValue && currentValue;
-                            }
-                        }, true);
-                    if (allPlayersSubmitted) {
-                        if (data.curr_round + 1 == data.total_rounds) {
-                            setGameState("finished");
-                        } else {
-                            setGameState("overview");
-                        }
-                    } else {
-                        setGameState("submitted");
-                    }
-                }
-                if (data.max_round_end < Date.now()) {
-                    setGameState("overview");
-                }
-                console.log("game:", data);
-                setGame(data);
+                setGameState(game.getState());
+                setGame(game);
                 setLoading(false);
             },
             (e) => {
-                console.log("Game error");
+                debug("Game error");
                 console.error(e);
             },
         );
 
         return () => {
-            setGame(null);
+            setGame(undefined);
+            debug("Unsubscribed Game");
             unsubGame();
         };
     }, []);
-
-    async function fetchLyrics() {
-        if (!game) {
-            return;
-        }
-        let lyrics = await getDoc(
-            doc(firestore, "/games/" + uuid + "/lyrics/" + game.curr_round),
-        );
-        if (!lyrics.exists()) {
-            setError("Internal Error: Access to lyrics denied");
-        }
-        setLyrics(lyrics.data()?.lyrics);
-    }
-
-    async function nextRound() {
-        let now = Date.now();
-        const nextRound = httpsCallable(functions, "nextRound");
-        console.log(Date.now() - now);
-        await nextRound({
-            uuid: uuid,
-        });
-        setGameState("countdown");
-        console.log("completed submit");
-    }
-
-    async function endGame() {
-        await updateDoc(doc(firestore, "lobbies", user.lobby), {
-            game: "",
-        });
-        returnToLobby();
-    }
 
     function returnToLobby() {
         navigate("/lobby/" + user.lobby + "?ignore=" + uuid);
@@ -120,8 +65,16 @@ export default function GameScreen() {
         if (!game) {
             return;
         }
-        setTimeout(fetchLyrics, Math.max(game.round_start - Date.now(), 0));
-    }, [game?.curr_round]);
+        console.log("timeout started");
+        setTimeout(
+            async () => {
+                debug("Fetching Lyrics");
+                setLyrics(await game.fetchLyrics());
+                debug("Fetched Lyrics");
+            },
+            Math.max(game.roundStart - Date.now(), 0),
+        );
+    }, [game?.currRound]);
 
     if (typeof uuid !== "string") {
         return <div>no uuid</div>;
@@ -139,7 +92,7 @@ export default function GameScreen() {
         return <div>{error}</div>;
     }
 
-    if (gameState === "countdown") {
+    if (gameState === GameState.COUNTDOWN) {
         return (
             <Frame title={"Get Ready"} topComponent={null}>
                 <div id={styles.countdownContainer}>
@@ -147,9 +100,9 @@ export default function GameScreen() {
                     {
                         <Countdown
                             start={Math.ceil(
-                                (game.round_start - Date.now()) / 1000,
+                                (game.roundStart - Date.now()) / 1000,
                             )}
-                            onComplete={() => setGameState("guessing")}
+                            onComplete={() => setGameState(GameState.GUESSING)}
                         />
                     }
                 </div>
@@ -157,15 +110,15 @@ export default function GameScreen() {
         );
     }
 
-    if (gameState === "overview") {
+    if (gameState === GameState.OVERVIEW) {
         return (
             <Frame
                 title={"Result"}
                 topComponent={
-                    game.curr_round + 1 < game.total_rounds ? (
+                    game.currRound + 1 < game.totalRounds ? (
                         game.host === user.auth.uid ? (
                             <button
-                                onClick={nextRound}
+                                onClick={() => game.nextRound()}
                                 className={"glassy button-small"}
                             >
                                 Continue
@@ -176,7 +129,7 @@ export default function GameScreen() {
                     ) : (
                         <button
                             onClick={async () => {
-                                setGameState("finished");
+                                setGameState(GameState.FINISHED);
                             }}
                             className={"glassy button-small"}
                         >
@@ -190,7 +143,7 @@ export default function GameScreen() {
         );
     }
 
-    if (gameState === "finished") {
+    if (gameState === GameState.FINISHED) {
         return (
             <Frame
                 title={"Placements"}
@@ -198,7 +151,9 @@ export default function GameScreen() {
                     <button
                         onClick={
                             game.host === user.auth.uid
-                                ? endGame
+                                ? () => {
+                                      game.endGame().then(returnToLobby);
+                                  }
                                 : returnToLobby
                         }
                         className={"glassy button-small"}
@@ -214,7 +169,7 @@ export default function GameScreen() {
         );
     }
 
-    if (gameState === "submitted") {
+    if (gameState === GameState.SUBMITTED) {
         return (
             <div>
                 <p>Waiting for other players....</p>
@@ -222,9 +177,9 @@ export default function GameScreen() {
                     round ends in:{" "}
                     <Countdown
                         start={Math.ceil(
-                            (game.max_round_end - Date.now()) / 1000,
+                            (game.maxRoundEnd - Date.now()) / 1000,
                         )}
-                        onComplete={() => setGameState("overview")}
+                        onComplete={() => setGameState(GameState.OVERVIEW)}
                     />
                 </p>
                 <PlayerList game={game} />
@@ -245,8 +200,8 @@ export default function GameScreen() {
             <div id={styles.container}>
                 <div className={"glassy"} id={styles.titleContainer}>
                     <h1>
-                        Round {(game?.curr_round ?? 0) + 1}/{game?.total_rounds}
-                        : {title}
+                        Round {(game?.currRound ?? 0) + 1}/{game?.totalRounds}:{" "}
+                        {title}
                     </h1>
                     {topComponent}
                 </div>
@@ -263,9 +218,9 @@ export default function GameScreen() {
                     <p style={{ marginRight: "1vw" }}>Time left:</p>
                     <Countdown
                         start={Math.ceil(
-                            (game.max_round_end - Date.now()) / 1000,
+                            (game.maxRoundEnd - Date.now()) / 1000,
                         )}
-                        onComplete={() => setGameState("overview")}
+                        onComplete={() => setGameState(GameState.OVERVIEW)}
                     />
                 </div>
             }

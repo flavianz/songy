@@ -1,5 +1,5 @@
-import { Game } from "../../firebase/types.ts";
 import { wc_hex_is_light } from "../../firebase/functions/utils.ts";
+import { Game } from "../../types/Game.ts";
 
 export default function PlayerList({ game }: { game: Game }) {
     return (
@@ -17,7 +17,7 @@ export default function PlayerList({ game }: { game: Game }) {
                             }}
                         >
                             {player.username} [{player.points}]{" "}
-                            {player.last_guess_round === game.curr_round
+                            {player.last_guess_round === game.currRound
                                 ? "has guesses"
                                 : ""}
                         </p>

@@ -1,7 +1,7 @@
 import { getUser } from "../../context/AuthContext.tsx";
 import styles from "./EndOverview.module.css";
 import { wc_hex_is_light } from "../../firebase/functions/utils.ts";
-import { Game } from "../../firebase/types.ts";
+import { Game } from "../../types/Game.ts";
 
 export default function EndOverview({ game }: { game: Game }) {
     let user = getUser()!;

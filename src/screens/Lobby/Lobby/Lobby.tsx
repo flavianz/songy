@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import { FirestoreLobby } from "../../../firebase/types.ts";
 import {
     doc,
     onSnapshot,
@@ -21,6 +20,7 @@ import styles from "./Lobby.module.css";
 import { LobbyPlayer } from "../../../../functions/src/types.ts";
 import ChevronsUpIcon from "../../../assets/icons/ChevronsUpIcon.tsx";
 import UserXIcon from "../../../assets/icons/UserXIcon.tsx";
+import { FirestoreLobby } from "../../../types/types.ts";
 
 export default function Lobby() {
     const user = getUser()!;

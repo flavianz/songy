@@ -1,9 +1,10 @@
-import { Game, GameState, Guess } from "../../firebase/types.ts";
 import { useState } from "react";
 import { doc, updateDoc } from "firebase/firestore";
 import { firestore } from "../../firebase/firebase.ts";
 import { getUser } from "../../context/AuthContext.tsx";
 import styles from "./LyricsOverview.module.css";
+import { GameState, Guess } from "../../types/types.ts";
+import { Game } from "../../types/Game.ts";
 
 export default function LyricsOverview({
     game,
@@ -32,12 +33,12 @@ export default function LyricsOverview({
             return;
         }
         await updateDoc(
-            doc(firestore, "/games/" + uuid + "/guesses/" + game.curr_round),
+            doc(firestore, "/games/" + uuid + "/guesses/" + game.currRound),
             {
                 [user.auth.uid]: input,
             },
         );
-        setState("submitted");
+        setState(GameState.SUBMITTED);
     }
 
     return (

@@ -1,8 +1,9 @@
-import { Game, Guesses } from "../../firebase/types.ts";
 import { useEffect, useState } from "react";
 import { doc, getDoc } from "firebase/firestore";
 import { firestore } from "../../firebase/firebase.ts";
 import styles from "./PointOverview.module.css";
+import { Guesses } from "../../types/types.ts";
+import { Game } from "../../types/Game.ts";
 
 export default function PointOverview({
     game,
@@ -19,7 +20,7 @@ export default function PointOverview({
 
     useEffect(() => {
         getDoc(
-            doc(firestore, "/games/" + uuid + "/guesses/" + game.curr_round),
+            doc(firestore, "/games/" + uuid + "/guesses/" + game.currRound),
         ).then((doc) => {
             if (!doc.exists()) {
                 setError("invalid round");
@@ -28,11 +29,11 @@ export default function PointOverview({
             setGuesses(doc.data() as Guesses);
         });
         getDoc(
-            doc(firestore, "/games/" + uuid + "/lyrics/" + game.curr_round),
+            doc(firestore, "/games/" + uuid + "/lyrics/" + game.currRound),
         ).then((doc) => {
             setLyrics(doc.data()?.lyrics ?? "<none>");
         });
-    }, [game.curr_round]);
+    }, [game.currRound]);
 
     if (!guesses) {
         return <div>loading results...</div>;
