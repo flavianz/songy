@@ -35,7 +35,7 @@ export default function Lobby() {
 
     const [lobbyData, setLobbyData] = useState<FirestoreLobby | null>(null);
     const [loading, setLoading] = useState(true);
-    const [error, setError] = useState("");
+    const [_error, setError] = useState("");
 
     useEffect(() => {
         debug("subscribed lobby");
@@ -99,7 +99,6 @@ export default function Lobby() {
         let response = (await startGame({
             code: lobbyCode,
         })) as { data: { code: string; data?: { uuid: string } } };
-        console.log(response);
         if (response.data.code === "100") {
             navigate("/game/" + response.data.data?.uuid);
         }
@@ -132,7 +131,6 @@ export default function Lobby() {
             host: uid,
         });
     }
-    console.log(lobbyData);
     return (
         <div id={styles.container}>
             <div id={styles.header} className={"glassy"}>

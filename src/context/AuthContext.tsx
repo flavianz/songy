@@ -1,5 +1,5 @@
 import React, { useContext } from "react";
-import { Profile } from "../firebase/types.ts";
+import { Profile } from "../types/types.ts";
 
 export const AuthContext = React.createContext<Profile | null>(null);
 

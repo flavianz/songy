@@ -40,7 +40,11 @@ export default function GameScreen() {
                     unsubGame();
                     setError("Game does not exist");
                 }
-                setGameState(game.getState());
+                let state = game.getState();
+                //be able to see the last rounds' overview
+                setGameState(
+                    state === GameState.FINISHED ? GameState.OVERVIEW : state,
+                );
                 setGame(game);
                 setLoading(false);
             },

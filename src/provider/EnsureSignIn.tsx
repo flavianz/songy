@@ -29,5 +29,5 @@ export default function EnsureSignIn({
         return <p>loading</p>;
     }
 
-    return loggedIn ? children : <Navigate to={"/signin"} />;
+    return loggedIn ? <div>{children}</div> : <Navigate to={"/signin"} />;
 }

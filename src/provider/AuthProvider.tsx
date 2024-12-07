@@ -1,10 +1,10 @@
 import { ReactElement, ReactNode, useEffect, useState } from "react";
 import { AuthContext } from "../context/AuthContext";
 import { auth, firestore } from "../firebase/firebase.ts";
-import { FirestoreUser } from "../firebase/types.ts";
 import { doc, onSnapshot } from "firebase/firestore";
 import { User } from "firebase/auth";
 import { debug } from "../main.tsx";
+import { FirestoreUser } from "../types/types.ts";
 
 export function AuthProvider({
     children,
@@ -23,7 +23,7 @@ export function AuthProvider({
 
     useEffect(() => {
         return auth.onAuthStateChanged(async (firebaseUser) => {
-            debug("auth state changed", firebaseUser);
+            debug("auth state changed" + firebaseUser);
             setAuthUser(firebaseUser);
         });
     }, []);

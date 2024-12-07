@@ -23,7 +23,7 @@ export default function Countdown({
     }, []);
 
     if (countdown < 0) {
-        return null;
+        return <p></p>;
     }
 
     return <p>{countdown}</p>;
