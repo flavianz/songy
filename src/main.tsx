@@ -1,7 +1,11 @@
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import "./index.css";
-import { createBrowserRouter, RouterProvider } from "react-router-dom";
+import {
+    createBrowserRouter,
+    Navigate,
+    RouterProvider,
+} from "react-router-dom";
 import Home from "./screens/Home/Home.tsx";
 import SignIn from "./screens/SignIn/SignIn.tsx";
 import { AuthProvider } from "./provider/AuthProvider.tsx";
@@ -14,6 +18,7 @@ import Lobby from "./screens/Lobby/Lobby/Lobby.tsx";
 import Create from "./screens/Lobby/Create/Create.tsx";
 import GameScreen from "./screens/Game/GameScreen.tsx";
 import EnsureSignIn from "./provider/EnsureSignIn.tsx";
+import Setup from "./screens/Setup/Setup.tsx";
 
 export const BASE_URL = "http://localhost:5173/";
 
@@ -25,6 +30,10 @@ const browserRouter = createBrowserRouter([
     {
         path: "/signin",
         element: <SignIn />,
+    },
+    {
+        path: "/profile",
+        element: <Navigate to={"/profile/me"} />,
     },
     {
         path: "/profile/:uid",
@@ -79,6 +88,14 @@ const browserRouter = createBrowserRouter([
         element: (
             <EnsureSignIn>
                 <GameScreen />
+            </EnsureSignIn>
+        ),
+    },
+    {
+        path: "/setup",
+        element: (
+            <EnsureSignIn allowSetupIncomplete>
+                <Setup />
             </EnsureSignIn>
         ),
     },

@@ -1,33 +1,26 @@
-import { ReactNode, useEffect, useState } from "react";
-import { auth } from "../firebase/firebase.ts";
+import { ReactNode } from "react";
 import { Navigate } from "react-router-dom";
+import { getUser } from "../context/AuthContext.tsx";
 
 export default function EnsureSignIn({
     children,
     allowEmailUnverified = false,
+    allowSetupIncomplete = false,
 }: {
     children: ReactNode;
     allowEmailUnverified?: boolean;
+    allowSetupIncomplete?: boolean;
 }) {
-    const [loading, setLoading] = useState(true);
-    const [loggedIn, setLoggedIn] = useState(false);
-
-    useEffect(() => {
-        auth.onAuthStateChanged((user) => {
-            setLoading(true);
-            if (!user) {
-                setLoggedIn(false);
-                setLoading(false);
-                return;
-            }
-            setLoggedIn(user.emailVerified || allowEmailUnverified);
-            setLoading(false);
-        });
-    }, []);
-
-    if (loading) {
-        return <p>loading</p>;
+    let user = getUser();
+    if (!user) {
+        return <Navigate to={"/signin"} />;
+    }
+    if (!(user.auth.emailVerified || allowEmailUnverified)) {
+        return <Navigate to={"/check_inbox"} />;
+    }
+    if (!(user.setup_completed || allowSetupIncomplete)) {
+        return <Navigate to={"/setup"} />;
     }
 
-    return loggedIn ? <div>{children}</div> : <Navigate to={"/signin"} />;
+    return <div>{children}</div>;
 }

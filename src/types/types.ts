@@ -3,7 +3,9 @@ import { User } from "firebase/auth";
 export interface FirestoreUser {
     username: string;
     level: number;
+    xp: number;
     lobby: string;
+    setup_completed: boolean;
 }
 
 export interface Profile extends FirestoreUser {

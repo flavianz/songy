@@ -191,14 +191,11 @@ exports.onSignup = functions
     .region("europe-west1")
     .auth.user()
     .onCreate(async (user) => {
-        if (user.providerData.length === 0) {
-            console.log("User signed up anonymously");
-            return;
-        }
-        //create firestore user document
         await firestore.doc("/users/" + user.uid).create({
             username: "default_" + getRandomCode(8),
             level: 0,
+            xp: 0,
             lobby: "",
+            setup_completed: false,
         });
     });

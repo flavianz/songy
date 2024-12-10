@@ -1,0 +1,27 @@
+#container {
+    height: 100vh;
+    width: 100%;
+    place-content: center;
+    place-items: center;
+}
+#header {
+    font-size: 3rem;
+}
+#subHeader {
+    margin-bottom: 4vh;
+}
+#input {
+    padding: 2vh 2vw;
+    font-size: 2rem;
+}
+#button {
+    font-size: 2rem;
+    padding: 2vh 2vw;
+    margin-left: 2vw;
+}
+#button:hover {
+    cursor: pointer;
+}
+#error {
+
+}
