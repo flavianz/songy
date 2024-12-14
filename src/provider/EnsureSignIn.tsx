@@ -18,7 +18,7 @@ export default function EnsureSignIn({
     if (!(user.auth.emailVerified || allowEmailUnverified)) {
         return <Navigate to={"/check_inbox"} />;
     }
-    if (!(user.setup_completed || allowSetupIncomplete)) {
+    if (!(user.setupCompleted || allowSetupIncomplete)) {
         return <Navigate to={"/setup"} />;
     }
 

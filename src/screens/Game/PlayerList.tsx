@@ -1,4 +1,4 @@
-import { wc_hex_is_light } from "../../firebase/functions/utils.ts";
+import { wcHexIsLight } from "../../firebase/functions/utils.ts";
 import { Game } from "../../types/Game.ts";
 
 export default function PlayerList({ game }: { game: Game }) {
@@ -11,13 +11,13 @@ export default function PlayerList({ game }: { game: Game }) {
                     <div style={{ background: "#" + player.color }} key={key}>
                         <p
                             style={{
-                                color: wc_hex_is_light(player.color)
+                                color: wcHexIsLight(player.color)
                                     ? "#000000"
                                     : "#FFFFFF",
                             }}
                         >
                             {player.username} [{player.points}]{" "}
-                            {player.last_guess_round === game.currRound
+                            {player.lastGuessRound === game.currRound
                                 ? "has guesses"
                                 : ""}
                         </p>

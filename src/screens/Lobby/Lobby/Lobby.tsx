@@ -17,10 +17,10 @@ import { getUser } from "../../../context/AuthContext.tsx";
 import { httpsCallable } from "firebase/functions";
 import { debug } from "../../../main.tsx";
 import styles from "./Lobby.module.css";
-import { LobbyPlayer } from "../../../../functions/src/types.ts";
 import ChevronsUpIcon from "../../../assets/icons/ChevronsUpIcon.tsx";
 import UserXIcon from "../../../assets/icons/UserXIcon.tsx";
 import { FirestoreLobby } from "../../../types/types.ts";
+import { LobbyPlayer } from "../../../../functions/src/types/types.ts";
 
 export default function Lobby() {
     const user = getUser()!;
@@ -139,7 +139,7 @@ export default function Lobby() {
                 </p>
                 <p id={styles.playerCount}>
                     {Object.keys(lobbyData?.players!).length}/
-                    {lobbyData?.max_players}
+                    {lobbyData?.maxPlayers}
                 </p>
                 <div>
                     {lobbyData?.host === user.auth.uid && (

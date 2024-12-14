@@ -1,9 +1,9 @@
-export const BAD_REQUEST = { code: "400" };
-export const UNAUTHORIZED = { code: "401" };
-export const FORBIDDEN = { code: "403" };
-export const INTERNAL_ERROR = { code: "500" };
+export const BadRequest = { code: "400" };
+export const Unauthorized = { code: "401" };
+export const Forbidden = { code: "403" };
+export const InternalError = { code: "500" };
 
-export function OK(args?: object): Response {
+export function Ok(args?: object): Response {
     if (!args) {
         return { code: "100" };
     }

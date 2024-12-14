@@ -18,10 +18,10 @@ export class Game {
 
     constructor(game: GameType, user: Profile, uuid: string) {
         this.players = game.players;
-        this.roundStart = game.round_start;
-        this.totalRounds = game.total_rounds;
-        this.currRound = game.curr_round;
-        this.maxRoundEnd = game.max_round_end;
+        this.roundStart = game.roundStart;
+        this.totalRounds = game.totalRounds;
+        this.currRound = game.currRound;
+        this.maxRoundEnd = game.maxRoundEnd;
         this.host = game.host;
         this.uuid = uuid;
         this.user = user;
@@ -29,7 +29,7 @@ export class Game {
 
     public haveAllGuessed(): boolean {
         return Object.values(this.players)
-            .map((player) => player.last_guess_round === this.currRound)
+            .map((player) => player.lastGuessRound === this.currRound)
             .reduce((previousValue, currentValue) => {
                 {
                     return previousValue && currentValue;
@@ -46,7 +46,7 @@ export class Game {
     }
 
     public hasSubmitted(uid: string): boolean {
-        return this.players[uid].last_guess_round === this.currRound;
+        return this.players[uid].lastGuessRound === this.currRound;
     }
 
     public hasRoundStarted(): boolean {

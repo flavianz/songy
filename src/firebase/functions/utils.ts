@@ -13,7 +13,7 @@ export function getRandomCode(length: number) {
     return result;
 }
 
-export function wc_hex_is_light(color: string) {
+export function wcHexIsLight(color: string) {
     const c_r = parseInt(color.substring(0, 2), 16);
     const c_g = parseInt(color.substring(2, 4), 16);
     const c_b = parseInt(color.substring(4, 6), 16);

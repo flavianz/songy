@@ -18,12 +18,12 @@ export default function Setup() {
 
         await updateDoc(doc(firestore, "/users/" + user.auth.uid), {
             username: username,
-            setup_completed: true,
+            setupCompleted: true,
         });
     }
 
     useEffect(() => {
-        if (user.setup_completed) {
+        if (user.setupCompleted) {
             navigate("/profile");
         }
     }, [user]);

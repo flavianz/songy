@@ -5,7 +5,7 @@ export interface FirestoreUser {
     level: number;
     xp: number;
     lobby: string;
-    setup_completed: boolean;
+    setupCompleted: boolean;
 }
 
 export interface Profile extends FirestoreUser {
@@ -14,7 +14,7 @@ export interface Profile extends FirestoreUser {
 
 export interface FirestoreLobby {
     host: string;
-    max_players: number;
+    maxPlayers: number;
     game: string;
     players: {
         [uid: string]: FirestoreLobbyPlayer;
@@ -30,17 +30,17 @@ export interface GamePlayer {
     color: string;
     points: number;
     username: string;
-    last_guess_round: number;
+    lastGuessRound: number;
 }
 
 export interface GameType {
     players: {
         [uid: string]: GamePlayer;
     };
-    round_start: number;
-    total_rounds: number;
-    curr_round: number;
-    max_round_end: number;
+    roundStart: number;
+    totalRounds: number;
+    currRound: number;
+    maxRoundEnd: number;
     host: string;
 }
 export interface Answers {

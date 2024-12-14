@@ -1,5 +1,5 @@
 import songs from "./songs";
-import { Song } from "./types";
+import { Song } from "./types/types";
 
 export function getRandomSong(): Song {
     return songs[Math.ceil(Math.random() * (songs.length - 1))];

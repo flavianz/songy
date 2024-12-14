@@ -1,6 +1,6 @@
 import { getUser } from "../../context/AuthContext.tsx";
 import styles from "./EndOverview.module.css";
-import { wc_hex_is_light } from "../../firebase/functions/utils.ts";
+import { wcHexIsLight } from "../../firebase/functions/utils.ts";
 import { Game } from "../../types/Game.ts";
 
 export default function EndOverview({ game }: { game: Game }) {
@@ -52,7 +52,7 @@ export default function EndOverview({ game }: { game: Game }) {
                 >
                     <p
                         style={{
-                            color: wc_hex_is_light(player.color)
+                            color: wcHexIsLight(player.color)
                                 ? "unset"
                                 : "var(--background)",
                         }}
@@ -96,7 +96,7 @@ export default function EndOverview({ game }: { game: Game }) {
                                 className={styles.rankNumber}
                                 style={{
                                     background: "#" + player.color,
-                                    color: wc_hex_is_light(player.color)
+                                    color: wcHexIsLight(player.color)
                                         ? "unset"
                                         : "var(--background)",
                                 }}

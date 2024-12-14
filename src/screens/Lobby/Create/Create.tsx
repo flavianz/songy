@@ -24,7 +24,7 @@ export default function Create() {
         const batch = writeBatch(firestore);
         batch.set(doc(firestore, "lobbies", code), {
             host: user.auth.uid,
-            max_players: 10,
+            maxPlayers: 10,
             state: "idle",
             players: {
                 [user.auth.uid]: {

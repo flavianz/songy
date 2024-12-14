@@ -13,7 +13,7 @@ export interface LobbyPlayer {
 
 export interface Lobby {
     host: string;
-    max_players: number;
+    maxPlayers: number;
     players: {
         [uid: string]: LobbyPlayer;
     };
@@ -24,17 +24,17 @@ export interface GamePlayer {
     color: string;
     points: number;
     username: string;
-    last_guess_round: number;
+    lastGuessRound: number;
 }
 
 export interface Game {
     players: {
         [uid: string]: GamePlayer;
     };
-    round_start: number;
-    total_rounds: number;
-    curr_round: number;
-    max_round_end: number;
+    roundStart: number;
+    totalRounds: number;
+    currRound: number;
+    maxRoundEnd: number;
     host: string;
 }
 
@@ -50,3 +50,5 @@ export interface Guesses {
     solution: Guess;
     [uid: string]: Guess | null;
 }
+
+export type UID = string;
