@@ -148,18 +148,10 @@ export default function GameScreen() {
                 title={"Placements"}
                 topComponent={
                     <button
-                        onClick={
-                            game.host === user.auth.uid
-                                ? () => {
-                                      game.endGame().then(returnToLobby);
-                                  }
-                                : returnToLobby
-                        }
+                        onClick={returnToLobby}
                         className={"glassy button-small"}
                     >
-                        {game.host === user.auth.uid
-                            ? "End Game"
-                            : "Return to lobby"}
+                        Return to lobby
                     </button>
                 }
             >

@@ -1,8 +1,7 @@
-import { getFirestore } from "firebase-admin/lib/firestore";
 import { getRandomCode } from "../utils";
 import { User } from "./User";
+import { firestore } from "../index";
 
-const firestore = getFirestore();
 export class Profile extends User {
     public lobby: string;
     public setupCompleted: string;
@@ -32,9 +31,9 @@ export class Profile extends User {
         let data = doc.data()!;
         return new Profile(
             uid,
+            data.username,
             data.lobby,
             data.setupCompleted,
-            data.username,
             data.level,
             data.xp,
         );
@@ -42,15 +41,28 @@ export class Profile extends User {
 
     public static async create(uid: string) {
         try {
-            await firestore.doc("/users/" + uid).create({
+            let batch = firestore.batch();
+            batch.create(firestore.doc("/users/" + uid), {
                 username: "default_" + getRandomCode(8),
-                level: 0,
+                level: 1,
                 xp: 0,
                 lobby: "",
                 setupCompleted: false,
             });
+            batch.create(firestore.doc(`/users/${uid}/data/stats`), {
+                gameCount: 0,
+            });
+            await batch.commit();
         } catch (e) {
             throw new Error("Failed to create user", { cause: e });
         }
+    }
+
+    public currentLevelRequiredXp(): number {
+        return Math.pow(500, this.level);
+    }
+
+    public remainingXpToNextLevel(): number {
+        return this.currentLevelRequiredXp() - this.xp;
     }
 }

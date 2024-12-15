@@ -21,7 +21,7 @@ service cloud.firestore {
                 return resource.data.host == request.auth.uid;
             }
             function notTooManyPlayers(request, resource) {
-                return request.resource.data.players.size() <= resource.data.max_players;
+                return request.resource.data.players.size() <= resource.data.maxPlayers;
             }
             function onlyChangedThemselves(request, resource) {
                 return request.resource.data.diff(resource.data).affectedKeys().hasOnly(["players"])
@@ -47,7 +47,7 @@ service cloud.firestore {
                     return request.resource.data.diff(resource.data).changedKeys().hasOnly([request.auth.uid]);
                 }
                 function isDuringRound(request, gameDoc) {
-                    return gameDoc.data.curr_round == int(guessDoc) && gameDoc.data.max_round_end > request.time.toMillis();
+                    return gameDoc.data.currRound == int(guessDoc) && gameDoc.data.maxRoundEnd > request.time.toMillis();
                 }
                 function isFirstGuess(request, resource) {
                     return resource.data[request.auth.uid] == null;
@@ -62,9 +62,9 @@ service cloud.firestore {
                     && isFirstGuess(request, resource) && isPlayerInGame(request, resource);
 
                 function isAfterRound(resource, gameDoc) {
-                    return int(guessDoc) == gameDoc.data.curr_round ?
-                            (request.time.toMillis() >= gameDoc.data.max_round_end || !(null in resource.data.values())) :
-                            int(guessDoc) < gameDoc.data.curr_round;
+                    return int(guessDoc) == gameDoc.data.currRound ?
+                            (request.time.toMillis() >= gameDoc.data.maxRoundEnd || !(null in resource.data.values())) :
+                            int(guessDoc) < gameDoc.data.currRound;
                 }
 
                 allow get: if isSignedIn() && isAfterRound(resource, get(/databases/$(database)/documents/games/$(gamesDoc))) && isPlayerInGame(request, resource);
@@ -72,9 +72,9 @@ service cloud.firestore {
 
             match /lyrics/{lyricsDoc} {
                 function isReleased(request, gameDoc) {
-                    return int(lyricsDoc) == gameDoc.data.curr_round ?
-                            request.time.toMillis() >= gameDoc.data.round_start :
-                            int(lyricsDoc) < gameDoc.data.curr_round;
+                    return int(lyricsDoc) == gameDoc.data.currRound ?
+                            request.time.toMillis() >= gameDoc.data.roundStart :
+                            int(lyricsDoc) < gameDoc.data.currRound;
                 }
 
                 allow read: if isSignedIn() && isReleased(request, get(/databases/$(database)/documents/games/$(gamesDoc)));

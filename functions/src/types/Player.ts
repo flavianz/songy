@@ -12,6 +12,10 @@ export class Player extends User {
     public toGamePlayer(): GamePlayer {
         return new GamePlayer(this.uid, this.username, this.color, 0, -1);
     }
+
+    public static fromObject(obj: any, uid: UID): Player {
+        return new Player(uid, obj.username, obj.color);
+    }
 }
 
 export class GamePlayer extends Player {

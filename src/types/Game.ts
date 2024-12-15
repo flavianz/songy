@@ -2,7 +2,7 @@ import { GamePlayer, GameState, GameType, Profile } from "./types.ts";
 import { httpsCallable } from "firebase/functions";
 import { firestore, functions } from "../firebase/firebase.ts";
 import { debug } from "../main.tsx";
-import { doc, getDoc, updateDoc } from "firebase/firestore";
+import { doc, getDoc } from "firebase/firestore";
 
 export class Game {
     public players: {
@@ -88,18 +88,6 @@ export class Game {
         debug("nextRound function took " + (Date.now() - now) + "ms");
     }
 
-    public async endGame(): Promise<void> {
-        if (!this.isHost(this.user.auth.uid)) {
-            return;
-        }
-        let now = Date.now();
-        await updateDoc(doc(firestore, "lobbies", this.user.lobby), {
-            game: "",
-        });
-        debug("endGame took " + (Date.now() - now) + "ms");
-        debug("endGame took " + (Date.now() - now) + "ms");
-    }
-
     public async fetchLyrics(): Promise<string | null> {
         if (!this.hasRoundStarted()) {
             return null;
@@ -111,5 +99,23 @@ export class Game {
             return null;
         }
         return lyrics.data().lyrics as string | null;
+    }
+
+    public async calculateGameResults() {
+        if (
+            this.players[this.user.auth.uid].lastGuessRound === this.totalRounds
+        ) {
+            return;
+        }
+        return await httpsCallable(
+            functions,
+            "calculateGameResults",
+        )({
+            uuid: this.uuid,
+        });
+    }
+
+    public getRankedPlayers() {
+        return Object.values(this.players).sort((a, b) => b.points - a.points);
     }
 }

@@ -1,7 +1,7 @@
 import { UID } from "./types";
 import { GamePlayer, Player } from "./Player";
-import { getFirestore } from "firebase-admin/firestore";
-const firestore = getFirestore();
+import { firestore } from "../index";
+
 export class Lobby {
     public code: string;
     public game: string;
@@ -34,7 +34,9 @@ export class Lobby {
             data.game,
             data.host,
             data.maxPlayers,
-            data.players,
+            Object.entries(data.players).map((player) => {
+                return Player.fromObject(player[1], player[0]);
+            }),
         );
     }
 

@@ -8,10 +8,11 @@ import functions = require("firebase-functions/v1");
 import { Profile } from "./types/Profile";
 import { Lobby } from "./types/Lobby";
 import { Game } from "./types/Game";
+import { getFirestore } from "firebase-admin/firestore";
 
 initializeApp();
-
 setGlobalOptions({ region: "europe-west1" });
+export const firestore = getFirestore();
 
 exports.startGame = onCall(async (request) => {
     if (!request.auth) {
@@ -120,6 +121,33 @@ exports.nextRound = onCall(async (request) => {
     }
     await game.nextRound();
 
+    return Ok();
+});
+
+exports.calculateGameResults = onCall(async (request) => {
+    if (!request.auth) {
+        return Unauthorized;
+    }
+    if (typeof request.data.uuid !== "string") {
+        return BadRequest;
+    }
+    const uuid = request.data.uuid as string;
+    let game;
+    try {
+        game = await Game.fetch(uuid);
+    } catch (e) {
+        return BadRequest;
+    }
+    if (!game.isPlayer(request.auth.uid)) {
+        return Forbidden;
+    }
+    if (game.hasPlayerCalculatedResults(request.auth.uid)) {
+        return Forbidden;
+    }
+    if (!game.hasGameEnded()) {
+        return Forbidden;
+    }
+    await game.calculateResults(request.auth.uid);
     return Ok();
 });
 

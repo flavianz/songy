@@ -1,10 +1,11 @@
 import { Answers, UID } from "./types";
 import { GamePlayer } from "./Player";
-import { FieldValue, getFirestore } from "firebase-admin/firestore";
+import { FieldValue } from "firebase-admin/firestore";
 import { v4 as generateUUID } from "uuid";
 import { getRandomSong } from "../utils";
+import { firestore } from "../index";
+import { Profile } from "./Profile";
 
-const firestore = getFirestore();
 export class Game {
     public currRound: number;
     public host: UID;
@@ -45,7 +46,13 @@ export class Game {
         const uuid = generateUUID();
         const batch = firestore.batch();
         batch.create(firestore.doc("/games/" + uuid), {
-            players: players.map((player) => player.toObject()),
+            players: players.reduce(
+                (acc, player) => {
+                    acc[player.uid] = player.toObject();
+                    return acc;
+                },
+                {} as { [uid: UID]: object },
+            ),
             totalRounds: totalRounds,
             roundStart: Date.now() + 3300, // 3 seconds until start, 300 ms latency puffer
             currRound: 0,
@@ -141,12 +148,73 @@ export class Game {
         return this.host === uid;
     }
 
+    public isPlayer(uid: string): boolean {
+        return this.players.some((player) => player.uid === uid);
+    }
+
+    public getPlayer(uid: string): GamePlayer | null {
+        return this.players.find((player) => player.uid === uid) || null;
+    }
+
+    public hasPlayerCalculatedResults(uid: string) {
+        return this.getPlayer(uid)!.lastGuessRound >= this.totalRounds;
+    }
+
+    public getRank(uid: string) {
+        return this.players
+            .sort((a, b) => b.points - a.points)
+            .findIndex((player) => player.uid === uid);
+    }
+
+    public getGainedXp(uid: string) {
+        return (
+            ((this.players.length - this.getRank(uid)) / this.players.length) *
+                100 +
+            this.getPlayer(uid)!.points
+        );
+    }
+
+    public async calculateResults(uid: string) {
+        const profile = await Profile.fetch(uid);
+        let xpTotal = this.getGainedXp(uid) + profile.xp;
+        let levelTotal = 0;
+
+        while (xpTotal >= profile.remainingXpToNextLevel()) {
+            xpTotal -= profile.remainingXpToNextLevel();
+            levelTotal++;
+        }
+        let batch = firestore.batch();
+        batch.update(firestore.doc(`/users/${uid}`), {
+            xp: FieldValue.increment(xpTotal),
+            level: FieldValue.increment(levelTotal),
+        });
+        batch.update(firestore.doc(`/users/${uid}/data/stats`), {
+            gameCount: FieldValue.increment(1),
+        });
+        batch.update(firestore.doc(`/games/${this.uuid}`), {
+            ["players." + uid + ".lastGuessRound"]: this.totalRounds,
+        });
+        if (this.isHost(uid)) {
+            batch.update(firestore.doc(`/lobbies/${profile.lobby}`), {
+                game: "",
+            });
+        }
+        await batch.commit();
+    }
+
     public async nextRound() {
         await firestore.doc(`/games/${this.uuid}`).update({
             currRound: FieldValue.increment(1),
             maxRoundEnd: Date.now() + this.roundLength + 3300,
             roundStart: Date.now() + 3300,
         });
+    }
+
+    public hasGameEnded() {
+        return (
+            (this.hasRoundEnded() || this.haveAllGuessed()) &&
+            this.isLastRound()
+        );
     }
 
     public static async addGuessResult(
