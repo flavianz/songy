@@ -1,22 +1,45 @@
 import styles from "./Header.module.css";
 import UserIcon from "../../assets/icons/UserIcon.tsx";
 import SettingsIcon from "../../assets/icons/SettingsIcon.tsx";
-import { useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
+import {
+    NavigationMenu,
+    NavigationMenuItem,
+    NavigationMenuLink,
+    NavigationMenuList,
+    navigationMenuTriggerStyle,
+} from "@/Components/ui/navigation-menu.tsx";
+import { Separator } from "@/Components/ui/separator.tsx";
 
 export default function Header() {
-    const navigate = useNavigate();
     return (
-        <div id={styles.container} className={"glassy"}>
-            <p id={styles.title}>Songy</p>
-            <div id={styles.iconContainer}>
-                <SettingsIcon className={styles.icon} />
-                <UserIcon
-                    className={styles.icon}
-                    onClick={() => {
-                        navigate("/profile/me");
-                    }}
-                />
+        <>
+            <div id={styles.container}>
+                <p id={styles.title}>Songy</p>
+                <NavigationMenu>
+                    <NavigationMenuList>
+                        <NavigationMenuItem>
+                            <Link to={"/profile"}>
+                                <NavigationMenuLink
+                                    className={navigationMenuTriggerStyle()}
+                                >
+                                    <UserIcon />
+                                </NavigationMenuLink>
+                            </Link>
+                        </NavigationMenuItem>
+                        <NavigationMenuItem>
+                            <Link to={"/settings"}>
+                                <NavigationMenuLink
+                                    className={navigationMenuTriggerStyle()}
+                                >
+                                    <SettingsIcon />
+                                </NavigationMenuLink>
+                            </Link>
+                        </NavigationMenuItem>
+                    </NavigationMenuList>
+                </NavigationMenu>
             </div>
-        </div>
+            <Separator />
+        </>
     );
 }

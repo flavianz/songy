@@ -4,8 +4,7 @@
     margin: 0;
 }
 #container {
-    margin: 2vh 1vw;
-    width: 94vw;
+    width: 100%;
     padding: 2vh 2vw;
     display: flex;
     justify-content: space-between;
@@ -13,7 +12,7 @@
 }
 .icon {
     padding: 1vh 1vw;
-    color: var(--text);
+    color: hsl(var(--foreground));
 }
 .icon:hover {
     cursor: pointer;

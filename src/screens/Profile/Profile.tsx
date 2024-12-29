@@ -1,10 +1,10 @@
-import { signOut } from "../../firebase/auth.ts";
+import { signOut } from "@/firebase/auth.ts";
 import { Navigate, useParams } from "react-router-dom";
 import { getUser } from "../../context/AuthContext.tsx";
 import { useEffect, useState } from "react";
-import { FirestoreUser } from "../../types/types.ts";
+import { FirestoreUser } from "@/types/types.ts";
 import { doc, getDoc } from "firebase/firestore";
-import { firestore } from "../../firebase/firebase.ts";
+import { firestore } from "@/firebase/firebase.ts";
 import Header from "../../Components/Header/Header.tsx";
 
 export default function Profile() {

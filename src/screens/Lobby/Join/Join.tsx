@@ -1,12 +1,12 @@
 import { useEffect, useState } from "react";
 import { doc, getDoc, writeBatch } from "firebase/firestore";
-import { firestore } from "../../../firebase/firebase.ts";
+import { firestore } from "@/firebase/firebase.ts";
 import { useNavigate } from "react-router-dom";
-import { getRandomHex } from "../../../firebase/functions/utils.ts";
-import { getUser } from "../../../context/AuthContext.tsx";
+import { getRandomHex } from "@/firebase/functions/utils.ts";
+import { getUser } from "@/context/AuthContext.tsx";
 import styles from "./Join.module.css";
 import Header from "../../../Components/Header/Header.tsx";
-import { FirestoreLobby } from "../../../types/types.ts";
+import { FirestoreLobby } from "@/types/types.ts";
 
 export default function Join() {
     const user = getUser()!;
