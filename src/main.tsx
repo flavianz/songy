@@ -14,7 +14,7 @@ import Signup from "./screens/Signup/Signup.tsx";
 import EmailVerified from "./screens/EmailVerified/EmailVerified.tsx";
 import CheckInbox from "./screens/CheckInbox/CheckInbox.tsx";
 import Join from "./screens/Lobby/Join/Join.tsx";
-import Lobby from "./screens/Lobby/Lobby/Lobby.tsx";
+import LobbyScreen from "./screens/Lobby/Lobby/LobbyScreen.tsx";
 import Create from "./screens/Lobby/Create/Create.tsx";
 import GameScreen from "./screens/Game/GameScreen.tsx";
 import EnsureSignIn from "./provider/EnsureSignIn.tsx";
@@ -71,7 +71,7 @@ const browserRouter = createBrowserRouter([
         path: "/lobby/:lobbyCode",
         element: (
             <EnsureSignIn>
-                <Lobby />
+                <LobbyScreen />
             </EnsureSignIn>
         ),
     },

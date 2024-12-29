@@ -21,11 +21,11 @@ import ChevronsUpIcon from "../../../assets/icons/ChevronsUpIcon.tsx";
 import UserXIcon from "../../../assets/icons/UserXIcon.tsx";
 import { FirestoreLobby } from "../../../types/types.ts";
 import { LobbyPlayer } from "../../../../functions/src/types/types.ts";
+import { Lobby } from "../../../types/Lobby.ts";
 
-export default function Lobby() {
+export default function LobbyScreen() {
     const user = getUser()!;
     let { lobbyCode } = useParams();
-    console.log(user);
     const navigate = useNavigate();
     const [searchParams] = useSearchParams();
 
@@ -45,11 +45,12 @@ export default function Lobby() {
                 debug("fetched lobby");
                 if (!document.exists()) {
                     unsub();
-                    setError("Lobby does not exist");
+                    setError("LobbyScreen does not exist");
                     return;
                 }
+                let lobby = new Lobby(document.data(), user, lobbyCode);
                 let data = document.data() as FirestoreLobby;
-                if (!Object.keys(data.players).includes(user.auth.uid)) {
+                if (!lobby.isInGame()) {
                     navigate("/join");
                 }
                 if (

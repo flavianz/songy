@@ -26,7 +26,7 @@ export class Lobby {
     public static async fetch(code: string): Promise<Lobby> {
         const doc = await firestore.doc(`/lobbies/${code}`).get();
         if (!doc.exists) {
-            throw new Error("Lobby does not exist");
+            throw new Error("LobbyScreen does not exist");
         }
         const data = doc.data()!;
         return new Lobby(

@@ -31,7 +31,7 @@ export default function GameScreen() {
                 debug("Refetched Game");
                 if (!doc.exists()) {
                     unsubGame();
-                    setError("Lobby does not exist");
+                    setError("LobbyScreen does not exist");
                     return;
                 }
                 let game = new Game(doc.data() as GameType, user, uuid!);
